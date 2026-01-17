@@ -442,7 +442,7 @@
                         `• *Owner Name:* ${this.ownerName}\n` +
                         `• *Email:* ${this.email}\n` +
                         `• *Phone:* ${this.phone}\n\nLooking forward to your confirmation! `;
-                    let whatsappUrl = `https://wa.me/6282227712353?text=${encodeURIComponent(message)}`;
+                    let whatsappUrl = `https://wa.me/6281212181182?text=${encodeURIComponent(message)}`;
                     window.location.href = whatsappUrl;
                 }
             }">

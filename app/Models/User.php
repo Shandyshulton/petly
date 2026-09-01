@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'phone_number',
+        'profile_image',
         'token',
         'role_role_id'
     ];
@@ -54,6 +55,14 @@ class User extends Authenticatable
         return $this->hasOne(Customer::class);
     }
 
+    public function addresses() {
+        return $this->hasMany(Address::class, 'user_user_id', 'user_id');
+    }
+
+    public function activeAddress() {
+        return $this->hasOne(Address::class, 'user_user_id', 'user_id')->where('is_active', true);
+    }
+
     public function courierDetails() {
         return $this->hasOne(Courier::class);
     }
@@ -64,6 +73,10 @@ class User extends Authenticatable
 
     public function transactions() {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function appointments() {
+        return $this->hasMany(Appointment::class, 'user_user_id', 'user_id');
     }
 
     public function carts(){

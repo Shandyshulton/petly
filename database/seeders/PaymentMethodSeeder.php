@@ -13,11 +13,10 @@ class PaymentMethodSeeder extends Seeder
      */
     public function run(): void
     {
-        PaymentMethod::create([
-            'payment_method_name' => 'Credit Card'
-        ]);
-        PaymentMethod::create([
-            'payment_method_name' => 'COD'
-        ]);
+        foreach (['QRIS', 'VA Bank'] as $paymentMethod) {
+            PaymentMethod::firstOrCreate([
+                'payment_method_name' => $paymentMethod,
+            ]);
+        }
     }
 }

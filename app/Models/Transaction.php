@@ -17,7 +17,7 @@ class Transaction extends Model
     ];
 
     public function transactionDetails() {
-        return $this->hasOne(TransactionDetail::class);
+        return $this->hasOne(TransactionDetail::class, 'transaction_transaction_id', 'transaction_id');
     }
 
     public function cart() {

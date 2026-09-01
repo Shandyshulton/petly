@@ -1,28 +1,54 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const themeLight = document.getElementById("theme-light");
-    const themeDark = document.getElementById("theme-dark");
+// Global theme (dark/light) manager.
+// Persists the choice in localStorage and toggles `.dark` on <html>.
+(function () {
+    const KEY = 'theme';
 
-    function setTheme(theme) {
-        if (theme === "dark") {
-            document.documentElement.classList.add("dark");
-            localStorage.setItem("theme", "dark");
-            themeDark.checked = true;
+    function apply(theme) {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
         } else {
-            document.documentElement.classList.remove("dark");
-            localStorage.setItem("theme", "light");
-            themeLight.checked = true;
+            document.documentElement.classList.remove('dark');
         }
     }
 
-    function loadTheme() {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        setTheme(savedTheme);
+    function current() {
+        const saved = localStorage.getItem(KEY);
+        if (saved === 'dark' || saved === 'light') return saved;
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
 
-    // Event listener untuk radio button
-    themeLight.addEventListener("change", () => setTheme("light"));
-    themeDark.addEventListener("change", () => setTheme("dark"));
+    // Apply as early as possible to avoid a flash of the wrong theme
+    apply(current());
 
-    // Panggil fungsi loadTheme saat halaman dimuat
-    loadTheme();
-});
+    window.petlyTheme = {
+        get: current,
+        set: function (theme) {
+            localStorage.setItem(KEY, theme);
+            apply(theme);
+        },
+        toggle: function () {
+            const next = current() === 'dark' ? 'light' : 'dark';
+            this.set(next);
+            return next;
+        },
+    };
+    window.setTheme = window.petlyTheme.set;
+
+    // Optional: wire up radio inputs used by the theme page (theme-light / theme-dark)
+    document.addEventListener('DOMContentLoaded', function () {
+        const light = document.getElementById('theme-light');
+        const dark = document.getElementById('theme-dark');
+
+        if (light && dark) {
+            if (current() === 'dark') dark.checked = true;
+            else light.checked = true;
+
+            light.addEventListener('change', function () {
+                if (light.checked) window.petlyTheme.set('light');
+            });
+            dark.addEventListener('change', function () {
+                if (dark.checked) window.petlyTheme.set('dark');
+            });
+        }
+    });
+})();

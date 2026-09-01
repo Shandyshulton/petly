@@ -6,6 +6,9 @@
 @source "../**/*.js";
 @source "../**/*.vue";
 
+/* Class-based dark mode: <html class="dark"> */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
     /* --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji'; */
@@ -16,8 +19,364 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smooth theme switching */
+html {
+    transition: background-color 0.2s ease-in-out;
+}
+
+html.dark body {
+    background-color: #2b2028;
+    color: #f6eef3;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Dark mode overrides for common Tailwind utility classes
+| (so legacy hardcoded pages also become dark).
+| !important guarantees they survive minification; values are chosen to
+| match Petly's rose dark palette so explicit dark:* variants still
+| look coherent.
+|--------------------------------------------------------------------------
+*/
+.dark :where(.bg-white) {
+    background-color: #3a2a35 !important;
+}
+
+.dark :where(.bg-gray-50) {
+    background-color: #2b2028 !important;
+}
+
+.dark :where(.bg-gray-100) {
+    background-color: #4a3744 !important;
+}
+
+.dark :where(.bg-gray-200) {
+    background-color: #5a4554 !important;
+}
+
+.dark :where(.bg-gray-300) {
+    background-color: #6a5060 !important;
+}
+
+html.dark.dark\:bg-slate-900,
+.dark :where(.dark\:bg-slate-900) {
+    background-color: #2b2028 !important;
+}
+
+.dark :where(.dark\:bg-slate-800),
+.dark :where(.dark\:bg-gray-800) {
+    background-color: #3a2a35 !important;
+}
+
+.dark :where(.dark\:hover\:bg-slate-700:hover),
+.dark :where(.dark\:hover\:bg-slate-800:hover) {
+    background-color: #4a3744 !important;
+}
+
+.dark :where(.dark\:border-slate-700),
+.dark :where(.dark\:border-gray-600) {
+    border-color: #6a5060 !important;
+}
+
+.dark :where(.text-gray-900) {
+    color: #fff7fb !important;
+}
+
+.dark :where(.text-black),
+.dark :where(.text-\[\#000\]),
+.dark :where(.text-\[\#000000\]) {
+    color: #f4edf1 !important;
+}
+
+.dark :where(.text-gray-800) {
+    color: #f4edf1 !important;
+}
+
+.dark :where(.text-gray-700) {
+    color: #e7dce3 !important;
+}
+
+.dark :where(.text-gray-600) {
+    color: #c8b8c2 !important;
+}
+
+.dark :where(.text-gray-500) {
+    color: #b6a3af !important;
+}
+
+.dark :where(.text-gray-400) {
+    color: #bcaebb !important;
+}
+
+.dark :where(.text-white),
+.dark :where(.text-\[\#FBFCFF\]) {
+    color: #fff7fb !important;
+}
+
+.dark :where(.text-\[\#777\]),
+.dark :where(.text-\[\#4e4e4e\]),
+.dark :where(.text-\[\#373737\]),
+.dark :where(.text-\[\#706f6c\]) {
+    color: #dcced8 !important;
+}
+
+.dark :where(.border-gray-200) {
+    border-color: #6a5060 !important;
+}
+
+.dark :where(.border-gray-300) {
+    border-color: #745868 !important;
+}
+
+.dark :where(.border-gray-100) {
+    border-color: #6a5060 !important;
+}
+
+.dark :where(.border) {
+    border-color: #6a5060;
+}
+
+.dark :where(.divide-gray-100 > :not([hidden]) ~ :not([hidden])) {
+    border-color: #6a5060 !important;
+}
+
+.dark :where(.divide-gray-200 > :not([hidden]) ~ :not([hidden])) {
+    border-color: #6a5060 !important;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Dark overrides for hardcoded brand/pastel colors
+| so pink sections and dark text don't look broken in dark mode
+|--------------------------------------------------------------------------
+*/
+.dark :where(.bg-\[\#FBFCFF\]) {
+    background-color: #2b2028 !important;
+}
+
+.dark :where(.bg-\[\#ffe7e7\]) {
+    background-color: #4a303f !important;
+}
+
+.dark :where(.bg-\[\#FFE3E1\]) {
+    background-color: #543545 !important;
+}
+
+.dark :where(.bg-\[\#FEE7E5\]) {
+    background-color: #5c3a4b !important;
+}
+
+.dark :where(.bg-\[\#FEE7E5\]\/70) {
+    background-color: rgb(92 58 75 / 0.82) !important;
+}
+
+.dark :where(.bg-pink-50) {
+    background-color: #4a303f !important;
+}
+
+.dark :where(.bg-pink-100) {
+    background-color: #5c3a4b !important;
+}
+
+.dark :where(.bg-pink-50\/60) {
+    background-color: rgb(74 48 63 / 0.76) !important;
+}
+
+.dark :where(.bg-red-400),
+.dark :where(.bg-red-500) {
+    background-color: #e85d75 !important;
+}
+
+.dark :where(.bg-\[\#FE9494\]),
+.dark :where(.bg-\[\#FF9494\]),
+.dark :where(.bg-\[\#fe9494\]) {
+    background-color: #e85d75 !important;
+}
+
+.dark :where(.bg-\[\#fba8a8\]) {
+    background-color: #8b3c52 !important;
+}
+
+.dark :where(.hover\:bg-pink-50:hover),
+.dark :where(.hover\:bg-pink-100:hover) {
+    background-color: #5c3a4b !important;
+}
+
+.dark :where(.hover\:bg-gray-50:hover),
+.dark :where(.hover\:bg-gray-100:hover) {
+    background-color: #4a3744 !important;
+}
+
+.dark :where(.hover\:bg-\[\#FE7A7A\]:hover),
+.dark :where(.hover\:bg-\[\#fe7f7f\]:hover),
+.dark :where(.hover\:bg-\[\#f57373\]:hover),
+.dark :where(.hover\:bg-\[\#e58585\]:hover),
+.dark :where(.hover\:bg-red-500:hover),
+.dark :where(.hover\:bg-red-600:hover),
+.dark :where(.hover\:bg-red-700:hover) {
+    background-color: #d94663 !important;
+}
+
+.dark :where(.text-\[\#2D2D2D\]) {
+    color: #f4edf1 !important;
+}
+
+.dark :where(.text-\[\#FF9494\]),
+.dark :where(.text-\[\#FE9494\]),
+.dark :where(.text-\[\#ff9395\]) {
+    color: #f7a0ad !important;
+}
+
+.dark :where(.text-pink-400),
+.dark :where(.text-pink-500) {
+    color: #f7a0ad !important;
+}
+
+.dark :where(.text-red-400),
+.dark :where(.text-red-500) {
+    color: #f7a0ad !important;
+}
+
+.dark :where(.hover\:text-\[\#FE9494\]:hover),
+.dark :where(.hover\:text-\[\#FE7070\]:hover),
+.dark :where(.hover\:text-pink-500:hover),
+.dark :where(.hover\:text-red-500:hover),
+.dark :where(.hover\:text-gray-800:hover),
+.dark :where(.hover\:text-gray-900:hover) {
+    color: #ffd0d8 !important;
+}
+
+.dark :where(.border-\[\#FEE7E5\]) {
+    border-color: #7a5668 !important;
+}
+
+.dark :where(.focus\:border-\[\#FE9494\]:focus),
+.dark :where(.focus\:border-\[\#FF9494\]:focus),
+.dark :where(.hover\:border-\[\#FE9494\]:hover) {
+    border-color: #fb7185 !important;
+}
+
+.dark :where(.focus\:ring-\[\#FE9494\]\/20:focus),
+.dark :where(.focus\:ring-\[\#FF9494\]\/20:focus) {
+    --tw-ring-color: rgb(251 113 133 / 0.28) !important;
+}
+
+.dark :where(.stroke-gray-500),
+.dark :where(.stroke-gray-600) {
+    stroke: #c8b8c2 !important;
+}
+
+.dark :where(.hover\:stroke-\[\#FE9494\]:hover) {
+    stroke: #ffd0d8 !important;
+}
+
+.dark :where(input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea) {
+    background-color: #3f2e39;
+    border-color: #745868;
+    color: #f4edf1;
+}
+
+.dark :where(input:not([type="checkbox"]):not([type="radio"]):disabled,
+    select:disabled,
+    textarea:disabled,
+    .cursor-not-allowed) {
+    background-color: #4a3744 !important;
+    color: #c8b8c4 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #bcaebb;
+}
+
+.dark :where(.accent-\[\#FE9494\]) {
+    accent-color: #e85d75;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Dark overrides for status badge pastels
+|--------------------------------------------------------------------------
+*/
+.dark :where(.bg-green-50) {
+    background-color: #123524 !important;
+}
+
+.dark :where(.text-green-700) {
+    color: #86efac !important;
+}
+
+.dark :where(.bg-red-50) {
+    background-color: #3b1d20 !important;
+}
+
+.dark :where(.text-red-600),
+.dark :where(.text-red-500) {
+    color: #fca5a5 !important;
+}
+
+.dark :where(.bg-amber-50) {
+    background-color: #3b2f12 !important;
+}
+
+.dark :where(.text-amber-700) {
+    color: #fcd34d !important;
+}
+
+.dark :where(.bg-blue-50) {
+    background-color: #12283b !important;
+}
+
+.dark :where(.text-blue-700) {
+    color: #93c5fd !important;
+}
+
+.dark :where(.bg-yellow-100) {
+    background-color: #3b2f12 !important;
+}
+
+.dark :where(.bg-red-100) {
+    background-color: #3b1d20 !important;
+}
+
+.dark :where(.bg-amber-100) {
+    background-color: #3b2f12 !important;
+}
+
+.dark :where(.bg-blue-100) {
+    background-color: #12283b !important;
+}
+
+.dark :where(.bg-green-100) {
+    background-color: #123524 !important;
+}
+
 @layer components {
   /* .btn-primary {
       @apply py-1.5 px-3 text-center bg-blue-700 rounded-md text-white;
   } */
+}
+
+/*
+|--------------------------------------------------------------------------
+| Custom utilities
+|--------------------------------------------------------------------------
+| `text-md` is not a Tailwind default class (only `text-base` exists), and
+| `text-[13px]` was previously generated at runtime by the Tailwind CDN used
+| by legacy pages (courier). Provide them explicitly so those pages render
+| consistently now that they use the compiled app.css.
+|--------------------------------------------------------------------------
+*/
+@layer utilities {
+    .text-md {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    .text-\[13px\] {
+        font-size: 13px;
+        line-height: 1.25rem;
+    }
 }

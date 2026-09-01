@@ -1,168 +1,152 @@
 <x-main>
-
-    <!-- Header Section -->
-    <div class="h-[80vh] flex items-center w-full px-16">
-        <div class="w-1/2 pr-10">
-            <h1 class="text-6xl font-bold text-gray-800 leading-tight">
-                Care For Your<br>
-                Pet, Love With <span class="text-[#ff9395]">PETLY</span>
+    <section class="grid min-h-[calc(100vh-7rem)] items-center gap-8 py-8 sm:py-12 lg:grid-cols-2 lg:gap-12">
+        <div class="order-2 lg:order-1">
+            <h1 class="max-w-2xl text-4xl font-bold leading-tight text-gray-900 sm:text-5xl lg:text-6xl">
+                Care For Your Pet, Love With <span class="text-[#ff9395]">PETLY</span>
             </h1>
-            <p class="text-gray-600 mt-6 text-lg">
-                Your one-stop shop for pet care essentials, <br>
-                made with love for every paw, tail, and whisker.
+            <p class="mt-5 max-w-xl text-base leading-7 text-gray-600 sm:text-lg">
+                Your one-stop shop for pet care essentials, made with love for every paw, tail, and whisker.
             </p>
-            <a href="/"
-                class="inline-block mt-8 px-10 bg-red-400 hover:bg-red-500 text-white font-medium py-3 px-8 rounded-full transition duration-300">
+            <a href="{{ route('product.index') }}"
+                class="mt-7 inline-flex w-full items-center justify-center rounded-full bg-red-400 px-8 py-3 text-sm font-semibold text-white transition hover:bg-red-500 sm:w-auto">
                 Get Started
             </a>
         </div>
-        <div class="w-1/2 flex justify-end items-center">
-            <img src="{{ URL('img/landingpage.png') }}" alt="Pets" class="w-full h-auto object-co ntain">
+
+        <div class="order-1 flex justify-center lg:order-2 lg:justify-end">
+            <img src="{{ URL('img/landingpage.png') }}" alt="Pets"
+                class="max-h-72 w-full max-w-md object-contain sm:max-h-96 lg:max-h-[34rem] lg:max-w-xl">
         </div>
-    </div>
+    </section>
 
-    <!-- Shop Section -->
-    <div class="w-full p-10 text-center bg-[#ffe7e7]">
-        <h2 class="text-[#FF9494] text-3xl italic font-[Brillotus]">Our Shop</h2>
-        <h1 class="text-3xl font-bold text-gray-800">Shop Our Products</h1>
-        <p class="text-gray-600 mt-2">Find everything your pets need — from tasty treats to cozy essentials, all in one
-            place!</p>
+    <section class="-mx-4 bg-[#ffe7e7] px-4 py-10 text-center sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <p class="text-2xl font-semibold italic text-[#FF9494]">Our Shop</p>
+        <h2 class="mt-1 text-2xl font-bold text-gray-900 sm:text-3xl">Shop Our Products</h2>
+        <p class="mx-auto mt-2 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
+            Find everything your pets need, from tasty treats to cozy essentials, all in one place.
+        </p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-6 px-10">
-            <!-- Product Card -->
-            @foreach (collect($products['data'])->take(4) as $product)
-                <div class="bg-white p-6 rounded-lg shadow-lg relative">
-                    <img src="{{ $product['product_image'] ?? 'https://via.placeholder.com/300' }}"
-                        class="w-full h-60 object-cover rounded">
-                    <div class="text-left mt-4">
-                        <h3 class="text-xl font-semibold"> {{ $product['product_name'] }}</h3>
-                        <p class="text-gray-500 uppercase">{{ $product['product_type']['product_type_name'] }}</p>
+        <div class="mx-auto mt-7 grid max-w-7xl grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            @foreach (collect($products['data'] ?? [])->take(4) as $product)
+                <article class="overflow-hidden rounded-lg bg-white text-left shadow-sm">
+                    <a href="{{ route('product.show', $product['product_id']) }}" class="block">
+                        <img src="{{ $product['product_image'] ?? asset('img/logo-petly.png') }}"
+                            alt="{{ $product['product_name'] }}"
+                            class="h-32 w-full object-cover sm:h-44 lg:h-52">
+                    </a>
+                    <div class="p-3 sm:p-4">
+                        <p class="truncate text-xs uppercase text-gray-400">
+                            {{ $product['product_type']['product_type_name'] ?? 'Product' }}
+                        </p>
+                        <a href="{{ route('product.show', $product['product_id']) }}"
+                            class="mt-1 line-clamp-2 min-h-10 text-sm font-semibold text-gray-900 hover:text-[#FE9494] sm:text-base">
+                            {{ $product['product_name'] }}
+                        </a>
+                        <div class="mt-4 flex items-center gap-2">
+                            <p class="min-w-0 flex-1 text-sm font-bold text-gray-900 sm:text-base">
+                                IDR {{ number_format($product['product_price'], 0, ',') }}
+                            </p>
+                            @if (session()->has('api_token'))
+                                <a href="{{ route('product.show', $product['product_id']) }}"
+                                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#fe9494] text-white hover:bg-[#f57373]"
+                                    aria-label="View product">
+                                    <i class="ri-shopping-bag-3-line text-lg"></i>
+                                </a>
+                            @else
+                                <button type="button" onclick="petlyRequireLogin('{{ route('login') }}')"
+                                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#fe9494] text-white hover:bg-[#f57373]"
+                                    aria-label="Add to cart">
+                                    <i class="ri-shopping-bag-3-line text-lg"></i>
+                                </button>
+                            @endif
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center mt-4">
-                        <p class="text-gray-900 font-bold text-lg">IDR
-                            {{ number_format($product['product_price'], 0, ',') }}</p>
-                        <button
-                            class="w-10 h-10 bg-[#fe9494] flex items-center justify-center rounded-full shadow-md hover:bg-[#f57373] transition">
-                            <i class="fi fi-rr-shopping-basket text-white text-lg"></i>
-                        </button>
-                    </div>
-                </div>
+                </article>
             @endforeach
         </div>
-        <a href="product"
-            class="inline-block mt-8 px-10 bg-red-400 hover:bg-red-500 text-white font-medium py-3 px-8 rounded-full transition duration-300">
+
+        <a href="{{ route('product.index') }}"
+            class="mt-8 inline-flex w-full items-center justify-center rounded-full bg-red-400 px-8 py-3 text-sm font-semibold text-white transition hover:bg-red-500 sm:w-auto">
             Visit Shop
         </a>
-    </div>
+    </section>
 
-    <!-- About Us Section-->
-    <div class="w-full p-6 bg-transparent mt-12 mb-12">
-        <div class="grid md:grid-cols-3 gap-15 max-w-7xl mx-auto">
-            <div
-                class="p-5 bg-white border border-pink-200 shadow-md rounded-2xl flex items-center space-x-3 text-left">
-                <div class='text-[#FF9494] text-4xl flex-none w-1/4 flex justify-center'><i
-                        class="fi fi-rr-scissors"></i> </div>
-                <div class='w-3/4'>
-                    <h3 class="text-lg font-semibold">Grooming</h3>
-                    <p class="text-sm text-gray-500">Lorem ipsum is simply dummy text of the printing and
-                        typesetting
-                        industry.</p>
+    <section class="py-10 sm:py-14">
+        <div class="grid gap-4 md:grid-cols-3">
+            <div class="flex items-start gap-4 rounded-lg border border-pink-100 bg-white p-4 shadow-sm">
+                <i class="ri-scissors-line text-3xl text-[#FF9494]"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Grooming</h3>
+                    <p class="mt-1 text-sm leading-6 text-gray-500">Clean, comfortable grooming support for pets.</p>
                 </div>
             </div>
-
-            <div
-                class="p-5 bg-white border border-pink-200 shadow-md rounded-2xl flex items-center space-x-3 text-left">
-                <div class='text-[#FF9494] text-4xl flex-none w-1/4 flex justify-center'><i class="fi fi-rr-doctor"></i>
-                </div>
-                <div class='w-3/4'>
-                    <h3 class="text-lg font-semibold">Care</h3>
-                    <p class="text-sm text-gray-500">Lorem ipsum is simply dummy text of the printing and
-                        typesetting
-                        industry.</p>
+            <div class="flex items-start gap-4 rounded-lg border border-pink-100 bg-white p-4 shadow-sm">
+                <i class="ri-heart-pulse-line text-3xl text-[#FF9494]"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Care</h3>
+                    <p class="mt-1 text-sm leading-6 text-gray-500">Simple tools to manage daily pet care needs.</p>
                 </div>
             </div>
-            <div
-                class="p-5 bg-white border border-pink-200 shadow-md rounded-2xl flex items-center space-x-3 text-left">
-                <div class='text-[#FF9494] text-4xl flex-none w-1/4 flex justify-center'><i
-                        class="fi fi-rr-store-alt"></i> </div>
-                <div class='w-3/4'>
-                    <h3 class="text-lg font-semibold">Store</h3>
-                    <p class="text-sm text-gray-500">Lorem ipsum is simply dummy text of the printing and
-                        typesetting
-                        industry.</p>
+            <div class="flex items-start gap-4 rounded-lg border border-pink-100 bg-white p-4 shadow-sm">
+                <i class="ri-store-2-line text-3xl text-[#FF9494]"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Store</h3>
+                    <p class="mt-1 text-sm leading-6 text-gray-500">Products, stock, and orders in one workflow.</p>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-start justify-center mt-20">
-            <div class="flex flex-row items-center gap-25 max-w-5xl w-full">
-                <!-- Image Section -->
-                <div class="relative w-1/2 flex justify-center">
-                    <img src="https://as1.ftcdn.net/v2/jpg/00/35/66/46/1000_F_35664648_N33kGk5LKODV6A9Hq5cqDaU9X2VwTPmg.jpg"
-                        alt="Cat" class="w-108 h-108 object-cover rounded-full shadow-lg">
-                </div>
-
-                <!-- Text Section -->
-                <div class="w-1/2">
-                    <h4 class="text-[#FF9494] text-3xl italic font-[Brillotus]">About Us</h4>
-                    <h2 class="text-3xl font-bold text-gray-900 leading-tight">We Love To Take <br>Care Of Your Pets
-                    </h2>
-                    <p class="text-gray-600 mt-6 mb-6 text-lg">Welcome to PETLY! – Your ultimate pet shop management
-                        system. From high-quality pet products to professional grooming and expert pet care, we make
-                        everything easy and convenient. Whether you're a pet owner or a business, PETLY!
-                        is here to streamline your experience and ensure every pet gets the best care possible. </p>
-                    <div class="flex gap-6 mt-5">
-                        <div class="flex items-center gap-2">
-                            <div class="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="miter" stroke-width="2"
-                                        d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                            <span class="text-gray-700 font-medium">Skilled Personal</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                            <span class="text-gray-700 font-medium">Quality Food</span>
-                        </div>
+        <div class="mt-12 grid items-center gap-8 lg:grid-cols-2">
+            <div class="flex justify-center lg:justify-start">
+                <img src="https://as1.ftcdn.net/v2/jpg/00/35/66/46/1000_F_35664648_N33kGk5LKODV6A9Hq5cqDaU9X2VwTPmg.jpg"
+                    alt="Cat"
+                    class="h-60 w-60 rounded-full object-cover shadow-sm sm:h-80 sm:w-80 lg:h-96 lg:w-96">
+            </div>
+            <div>
+                <p class="text-2xl font-semibold italic text-[#FF9494]">About Us</p>
+                <h2 class="mt-2 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
+                    We Love To Take Care Of Your Pets
+                </h2>
+                <p class="mt-5 text-sm leading-7 text-gray-600 sm:text-base">
+                    Welcome to PETLY, your pet shop management system for quality pet products, grooming, and care.
+                </p>
+                <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div class="flex items-center gap-3 text-sm font-medium text-gray-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-400">
+                            <i class="ri-check-line"></i>
+                        </span>
+                        Skilled Personal
                     </div>
-                    <a href="aboutus"
-                        class="inline-block mt-5 px-10 bg-red-400 hover:bg-red-500 text-white font-medium py-3 px-8 rounded-full transition duration-300">
-                        Learn More
-                    </a>
+                    <div class="flex items-center gap-3 text-sm font-medium text-gray-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-400">
+                            <i class="ri-check-line"></i>
+                        </span>
+                        Quality Food
+                    </div>
                 </div>
+                <a href="{{ route('about') }}"
+                    class="mt-7 inline-flex w-full items-center justify-center rounded-full bg-red-400 px-8 py-3 text-sm font-semibold text-white transition hover:bg-red-500 sm:w-auto">
+                    Learn More
+                </a>
             </div>
         </div>
+    </section>
 
-    </div>
-
-    <!-- Meet With Us -->
-    <div class="flex justify-center items-center py-12 w-full">
-        <div class="bg-[#FFE3E1] p-10 rounded-2xl flex items-center shadow-lg">
-            <div class="w-1/2 p-8">
-                <h3 class="text-[#FF9494] text-3xl italic font-[Brillotus]">Meet With Us</h3>
-                <h2 class="text-3xl font-bold mt-4">Book Your Visit Today</h2>
-                <p class="text-gray-700 mt-6 text-lg">Looking for expert vet care or a fresh grooming session for your
-                    furry friend? Book your visit today and let our friendly team take care of your pet’s health and
-                    happiness!</p>
-                <a href="services"
-                    class="inline-block mt-8 px-10 bg-red-400 hover:bg-red-500 text-white font-medium py-3 px-8 rounded-full transition duration-300">
+    <section class="pb-12">
+        <div class="grid overflow-hidden rounded-lg bg-[#FFE3E1] shadow-sm lg:grid-cols-2">
+            <div class="p-6 sm:p-8 lg:p-10">
+                <p class="text-2xl font-semibold italic text-[#FF9494]">Meet With Us</p>
+                <h2 class="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">Book Your Visit Today</h2>
+                <p class="mt-5 text-sm leading-7 text-gray-700 sm:text-base">
+                    Looking for vet care or a fresh grooming session? Book your visit and let the team handle the rest.
+                </p>
+                <a href="{{ route('services') }}"
+                    class="mt-7 inline-flex w-full items-center justify-center rounded-full bg-red-400 px-8 py-3 text-sm font-semibold text-white transition hover:bg-red-500 sm:w-auto">
                     Book Now
                 </a>
             </div>
-            <div class="w-1/2">
-                <img src="{{ URL('img/happy-asian.png') }}" alt="Happy Woman with Dog"
-                    class="w-full h-auto rounded-2xl">
-            </div>
+            <img src="{{ URL('img/happy-asian.png') }}" alt="Happy woman with dog"
+                class="h-64 w-full object-cover sm:h-80 lg:h-full">
         </div>
-    </div>
-
-
+    </section>
 </x-main>

@@ -9,10 +9,16 @@ class ProductCartController extends Controller
 {
     public function store(Request $request)
     {
+        if (!session()->has('api_token')) {
+            return redirect()
+                ->route('login')
+                ->with('failed', 'Please login first to add products to your cart.');
+        }
+
         $apiToken = session('api_token');
         $customerID = session('user_id');
         Http::withToken($apiToken)
-            ->post('http://petly.test:8080/api/customer/cart', [
+            ->post(config('services.petly_api.url') . '/api/customer/cart', [
                 'customer_user_id' => $customerID,
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity,
@@ -31,7 +37,7 @@ class ProductCartController extends Controller
 //     try {
 //         // First, check the product stock
 //         $productResponse = Http::withToken($apiToken)
-//             ->get("http://petly.test:8080/api/products/{$productId}");
+//             ->get(config('services.petly_api.url') . "/api/products/{$productId}");
 
 //         if (!$productResponse->successful()) {
 //             return back()->with('error', 'Unable to verify product availability. Please try again.');
@@ -52,7 +58,7 @@ class ProductCartController extends Controller
 
 //         // If stock validation passes, add to cart
 //         $cartResponse = Http::withToken($apiToken)
-//             ->post('http://petly.test:8080/api/customer/cart', [
+//             ->post(config('services.petly_api.url') . '/api/customer/cart', [
 //                 'customer_user_id' => $customerID,
 //                 'product_id' => $productId,
 //                 'quantity' => $requestedQuantity,
@@ -69,6 +75,4 @@ class ProductCartController extends Controller
 //     }
 // }
 }
-
-
 

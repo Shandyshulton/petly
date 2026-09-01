@@ -13,7 +13,8 @@ class Courier extends Model
     protected $fillable = [
         'user_user_id',
         'status',
-        'phone_number'
+        'vehicle_name',
+        'plate_number'
     ];
 
     protected $hidden = [
@@ -23,7 +24,7 @@ class Courier extends Model
 
     public function user()
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class, 'user_user_id', 'user_id');
     }
 
     public function delivery(){

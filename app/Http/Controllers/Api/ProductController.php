@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ProductPaginateResource;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -41,14 +42,14 @@ class ProductController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'product_name' => 'required|string|max:255',
-            'product_desc' => 'required|string|max:255',
-            'product_type' => 'required|in:food,medicine,accesories',
-            'pet_type' => 'required|in:dog,rabbit,cat,turtle',
+            'product_desc' => 'required|string',
+            'product_type' => ['required', Rule::exists('product_types', 'product_type_name')],
+            'pet_type' => ['required', Rule::exists('pet_types', 'pet_type_name')],
             'transaction_id' => 'nullable',
-            'product_image' => 'required|string|max:255',
-            'product_stock' => 'required|integer',
-            'product_rating' => 'required|integer|between:1,10',
-            'product_price' => 'required|integer',
+            'product_image' => 'required|string|max:2048',
+            'product_stock' => 'required|integer|min:0',
+            'product_rating' => 'required|numeric|between:0,10',
+            'product_price' => 'required|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -113,7 +114,56 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'product_name' => 'required|string|max:255',
+            'product_desc' => 'required|string',
+            'product_type' => ['required', Rule::exists('product_types', 'product_type_name')],
+            'pet_type' => ['required', Rule::exists('pet_types', 'pet_type_name')],
+            'product_image' => 'required|string|max:2048',
+            'product_stock' => 'required|integer|min:0',
+            'product_rating' => 'required|numeric|between:0,10',
+            'product_price' => 'required|integer|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $productType = ProductType::where('product_type_name', $request->product_type)->firstOrFail();
+            $petType = PetType::where('pet_type_name', $request->pet_type)->firstOrFail();
+
+            $product->update([
+                'product_name' => $request->product_name,
+                'product_desc' => $request->product_desc,
+                'product_product_type_id' => $productType->product_type_id,
+                'pet_pet_types_id' => $petType->pet_type_id,
+                'product_image' => $request->product_image,
+                'product_stock' => $request->product_stock,
+                'product_rating' => $request->product_rating,
+                'product_price' => $request->product_price,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Product successfully updated',
+                'data' => new ProductResource($product->fresh(['productType', 'petType'])),
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Update Product failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

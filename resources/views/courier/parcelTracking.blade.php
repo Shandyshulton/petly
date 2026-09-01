@@ -5,43 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Courier Tracking Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 </head>
 
 <body class="bg-gray-100">
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <div class="w-16 bg-white flex flex-col items-center py-4 shadow-sm">
-            <div class="mb-8">
-                <img src="/img/logopet.png" alt="Petty Logo" class="w-10 h-7">
-            </div>
-            <div class="flex flex-col items-center gap-8">
-                {{-- <a href="/" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-            <i class="ri-file-list-line text-gray-400 text-xl"></i>
-        </a> --}}
-                <a href="/courier/courier-info" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-user-line text-gray-400 text-xl"></i>
-                </a>
-                <a href="/courier/parcel-tracking"
-                    class="p-2 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors">
-                    <i class="ri-truck-line text-pink-400 text-xl"></i>
-                </a>
-            </div>
-            <div class="mt-auto">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                        <i class="ri-logout-box-r-line text-red-500 text-xl"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-
+    <x-courier-navbar />
+    <div class="min-h-screen">
         <!-- Main Content -->
-        <div class="flex-1 p-4 ml-20 mr-20">
+        <div class="flex-1 p-4 lg:pb-4">
             <!-- Search Bar -->
             <div class="mb-4 flex mt-6">
                 <div class="relative flex-1 max-w-md">
@@ -59,55 +42,66 @@
 
                     @foreach ($couriers as $delivery)
                         <div class="bg-white rounded-xl p-4 shadow-sm">
-                            <div class="flex justify-between items-center mb-2">
+                            <div class="flex justify-between items-center mb-2 gap-2">
                                 <div>
                                     <span class="text-gray-700 font-medium">Shipping ID : #
                                         {{ $delivery['delivery_id'] }}</span>
                                 </div>
-                                <div>
+                                <div class="shrink-0">
                                     <span class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-600">
                                         {{ $delivery['transaction']['transaction_status']['transaction_status_name'] }}
                                     </span>
                                 </div>
                             </div>
-                            <div class="flex justify-between items-center mb-3">
+                            <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
                                 <div>
                                     <p class="text-xs text-gray-500">Delivery Deadline</p>
-                                    <p class="text-xl font-semibold">
-                                        {{ \Carbon\Carbon::parse($delivery['delivery_deadline'])->format('d M Y, H:i') }}
+                                    <p class="text-base sm:text-lg font-semibold">
+                                        {{ \Carbon\Carbon::parse($delivery['delivery_deadline'], 'UTC')->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }}
                                     </p>
                                 </div>
                                 <div>
                                     <p class="text-xs text-gray-500">Delivery Class</p>
-                                    <p class="text-md font-medium">
+                                    <p class="text-sm font-medium">
                                         {{ $delivery['delivery_class']['delivery_class_name'] }}</p>
                                 </div>
                             </div>
-                            <div class="relative flex items-center justify-between py-2 mb-3">
-                                <div class="flex items-center">
-                                    <p class="text-md font-medium mx-2">Kemanggisan</p>
+                            <div class="flex items-center justify-between py-1.5 mb-2 gap-2">
+                                <div class="flex items-center min-w-0">
+                                    <p class="text-sm font-medium mx-1 break-words">{{ explode(',', $delivery['delivery_address'])[0] }}</p>
                                 </div>
-                                <div class="flex-grow border-t border-gray-300 mx-2"></div>
-                                <div class="flex items-center">
-                                    <p class="text-md font-medium mx-2">
-                                        {{ explode(',', $delivery['delivery_address'])[1] }}</p>
+                                <div class="flex-grow border-t border-gray-300 mx-1 shrink-0"></div>
+                                <div class="flex items-center min-w-0">
+                                    <p class="text-sm font-medium mx-1 break-words">
+                                        {{ explode(',', $delivery['delivery_address'])[1] ?? '' }}</p>
                                 </div>
                             </div>
                             <div class="mt-3 mb-2">
                                 <p class="text-xs text-gray-500">Full Address</p>
-                                <p class="text-sm">{{ $delivery['delivery_address'] }}</p>
+                                <p class="text-sm break-words">{{ $delivery['delivery_address'] }}</p>
+                                @php
+                                    // Ekstrak koordinat dari "| Pin: lat lng" jika ada
+                                    $pinMatch = [];
+                                    $hasPin = preg_match('/Pin:\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/', $delivery['delivery_address'] ?? '', $pinMatch);
+                                @endphp
+                                <button type="button"
+                                    onclick="openGoogleMaps('{{ $hasPin ? $pinMatch[1] . ',' . $pinMatch[2] : urlencode($delivery['delivery_address']) }}', {{ $hasPin ? 'true' : 'false' }})"
+                                    class="mt-2 inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:border-[#FE9494] hover:text-[#FE9494]">
+                                    <i class="ri-map-pin-2-line"></i>
+                                    Open in Google Maps
+                                </button>
                             </div>
-                            <div class="mt-3 mb-2">
+                            <div class="mt-2 mb-1">
                                 <p class="text-xs text-gray-500">Estimated Delivery</p>
                                 <p class="text-sm">{{ $delivery['delivery_class']['delivery_class_desc'] }}</p>
                             </div>
-                            <div class="mt-3 mb-2">
+                            <div class="mt-2 mb-1">
                                 <p class="text-xs text-gray-500">Transaction Date</p>
                                 <p class="text-sm">
-                                    {{ \Carbon\Carbon::parse($delivery['transaction']['transaction_date'])->format('d M Y, H:i') }}
+                                    {{ \Carbon\Carbon::parse($delivery['transaction']['transaction_date'], 'UTC')->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }}
                                 </p>
                             </div>
-                            <div class="mt-5">
+                            <div class="mt-4">
                                 <form action="{{ route('courier.finish') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="courier_id" value="">
@@ -130,7 +124,15 @@
                         <!-- Map Overview -->
                         <div>
                             <h2 class="text-sm font-semibold text-gray-700 mb-3">MAP OVERVIEW</h2>
-                            <div id="map" class="h-[450px] mb-4 rounded-lg"></div>
+                            <div class="relative">
+                                <div id="map" class="h-[450px] rounded-lg"></div>
+                                <button type="button" onclick="locateCourier()"
+                                    class="absolute right-3 top-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-md hover:bg-gray-50"
+                                    aria-label="Lokasi saya" title="Lokasi saya">
+                                    <i class="ri-crosshair-2-line text-xl"></i>
+                                </button>
+                            </div>
+                            <p id="map-status" class="mt-2 text-xs text-gray-500">Klik ikon untuk menampilkan posisi Anda.</p>
                         </div>
 
                         <script>
@@ -141,6 +143,58 @@
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             }).addTo(map);
+
+                            // Blue dot layer (Google Maps style "your location")
+                            var courierLocationLayer = L.layerGroup().addTo(map);
+
+                            function setCourierLocationDot(lat, lng) {
+                                courierLocationLayer.clearLayers();
+
+                                L.circle([lat, lng], {
+                                    radius: 30,
+                                    color: '#4285F4',
+                                    weight: 1,
+                                    fillColor: '#4285F4',
+                                    fillOpacity: 0.15,
+                                }).addTo(courierLocationLayer);
+
+                                L.circleMarker([lat, lng], {
+                                    radius: 8,
+                                    color: '#ffffff',
+                                    weight: 3,
+                                    fillColor: '#4285F4',
+                                    fillOpacity: 1,
+                                }).addTo(courierLocationLayer);
+                            }
+
+                            function locateCourier() {
+                                var status = document.getElementById('map-status');
+
+                                if (!navigator.geolocation) {
+                                    status.textContent = 'Browser tidak mendukung deteksi lokasi.';
+                                    return;
+                                }
+
+                                status.textContent = 'Mencari lokasi perangkat...';
+
+                                navigator.geolocation.getCurrentPosition(function (position) {
+                                    var lat = position.coords.latitude.toFixed(6);
+                                    var lng = position.coords.longitude.toFixed(6);
+
+                                    setCourierLocationDot(lat, lng);
+                                    map.setView([lat, lng], 16);
+
+                                    status.textContent = position.coords.accuracy
+                                        ? 'Posisi Anda aktif (akurat sampai ±' + Math.round(position.coords.accuracy) + ' meter).'
+                                        : 'Posisi Anda aktif.';
+                                }, function () {
+                                    status.textContent = 'Lokasi perangkat tidak dapat diakses.';
+                                }, {
+                                    enableHighAccuracy: true,
+                                    timeout: 10000,
+                                    maximumAge: 0
+                                });
+                            }
 
                             // Zoom functions for the buttons
                             function zoomIn() {
@@ -189,7 +243,7 @@
                                         <p class="text-sm text-gray-500">Driver</p>
                                     </div>
                                 </div>
-                                <div class="mt-4 flex justify-between">
+                                <div class="mt-4 flex flex-wrap justify-between gap-4">
                                     <div>
                                         <p class="text-xs text-gray-500">PHONE NUMBER</p>
                                         <p class="text-sm">+62 123 123 123</p>
@@ -225,7 +279,54 @@
         </div>
     </div>
 
-</body>
-</body>
+    <!-- Google Maps Modal -->
+    <div id="googleMapsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4"
+        style="display:none">
+        <div class="w-full max-w-3xl rounded-xl bg-white p-4 shadow-xl">
+            <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-800">Customer Location</h3>
+                <button type="button" onclick="closeGoogleMaps()" class="text-gray-400 hover:text-gray-600">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            <div class="overflow-hidden rounded-lg">
+                <iframe id="googleMapsFrame" title="Google Maps" class="h-[60vh] w-full border-0" allowfullscreen
+                    loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+            <div class="mt-4 flex justify-end gap-2">
+                <button type="button" onclick="closeGoogleMaps()"
+                    class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                    Close
+                </button>
+                <a id="googleMapsExternalLink" href="#" target="_blank" rel="noopener noreferrer"
+                    class="rounded-lg bg-[#FE9494] px-4 py-2 text-sm font-semibold text-white hover:bg-[#FE7A7A]">
+                    Open in new tab
+                </a>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        function openGoogleMaps(query, isCoordinate) {
+            const frame = document.getElementById('googleMapsFrame');
+            const modal = document.getElementById('googleMapsModal');
+            const externalLink = document.getElementById('googleMapsExternalLink');
+
+            // Saat koordinat tersedia, maps langsung memusatkan ke titik itu (z=16),
+            // bukan menampilkan daftar hasil pencarian.
+            frame.src = 'https://www.google.com/maps?q=' + query + '&z=16&output=embed';
+            externalLink.href = 'https://www.google.com/maps/search/?api=1&query=' + query;
+
+            modal.style.display = 'flex';
+        }
+
+        function closeGoogleMaps() {
+            const frame = document.getElementById('googleMapsFrame');
+            const modal = document.getElementById('googleMapsModal');
+
+            modal.style.display = 'none';
+            frame.src = '';
+        }
+    </script>
+</body>
 </html>

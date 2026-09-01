@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    <script type="module" src="http://[::1]:5173/@vite/client"></script><link rel="stylesheet" href="http://[::1]:5173/resources/css/app.css" />    <script type="module" src="http://[::1]:5173/@vite/client"></script><script type="module" src="http://[::1]:5173/resources/js/app.js"></script>    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+</head>
+
+<body class="min-h-screen bg-gray-100 font-sans dark:bg-slate-900">
+    <div id="petly-toast"
+    class="fixed right-4 top-4 z-[9999] hidden w-[min(24rem,calc(100vw-2rem))] translate-y-[-8px] rounded-lg border bg-white p-4 opacity-0 shadow-xl transition-all duration-300"
+    role="status" aria-live="polite">
+    <div class="flex gap-3">
+        <div id="petly-toast-icon"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+            <svg id="petly-toast-success-icon" class="hidden h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+            </svg>
+            <svg id="petly-toast-failed-icon" class="hidden h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd" />
+            </svg>
+        </div>
+        <div class="min-w-0 flex-1">
+            <p id="petly-toast-title" class="text-sm font-semibold text-gray-900"></p>
+            <p id="petly-toast-message" class="mt-1 break-words text-sm text-gray-600"></p>
+        </div>
+        <button type="button" id="petly-toast-close"
+            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Close notification">
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                    d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+            </svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const toast = document.getElementById('petly-toast');
+        const title = document.getElementById('petly-toast-title');
+        const message = document.getElementById('petly-toast-message');
+        const iconWrap = document.getElementById('petly-toast-icon');
+        const successIcon = document.getElementById('petly-toast-success-icon');
+        const failedIcon = document.getElementById('petly-toast-failed-icon');
+        const close = document.getElementById('petly-toast-close');
+        let timer = null;
+
+        window.petlyToast = function (type, text, options = {}) {
+            const isSuccess = type === 'success';
+
+            clearTimeout(timer);
+            title.textContent = isSuccess ? 'Success' : 'Failed';
+            message.textContent = text;
+
+            toast.classList.remove('border-green-200', 'border-red-200', 'bg-green-50', 'bg-red-50');
+            iconWrap.classList.remove('bg-green-100', 'bg-red-100', 'text-green-600', 'text-red-600');
+
+            toast.classList.add(isSuccess ? 'border-green-200' : 'border-red-200');
+            toast.classList.add(isSuccess ? 'bg-green-50' : 'bg-red-50');
+            iconWrap.classList.add(isSuccess ? 'bg-green-100' : 'bg-red-100');
+            iconWrap.classList.add(isSuccess ? 'text-green-600' : 'text-red-600');
+            successIcon.classList.toggle('hidden', !isSuccess);
+            failedIcon.classList.toggle('hidden', isSuccess);
+
+            toast.classList.remove('hidden');
+            requestAnimationFrame(function () {
+                toast.classList.remove('translate-y-[-8px]', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            });
+
+            timer = setTimeout(window.petlyHideToast, options.duration || 3200);
+        };
+
+        window.petlyHideToast = function () {
+            toast.classList.add('translate-y-[-8px]', 'opacity-0');
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            setTimeout(function () {
+                toast.classList.add('hidden');
+            }, 300);
+        };
+
+        window.petlyRequireLogin = function (redirectUrl) {
+            window.petlyToast('failed', 'Please login first to use the cart.', { duration: 1800 });
+            setTimeout(function () {
+                window.location.href = redirectUrl;
+            }, 900);
+        };
+
+        close.addEventListener('click', window.petlyHideToast);
+
+            })();
+</script>
+
+    <main class="flex min-h-screen items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
+        <div class="w-full max-w-5xl overflow-hidden rounded-lg bg-white shadow-sm lg:grid lg:grid-cols-2">
+            <section class="flex flex-col justify-center px-5 py-6 sm:px-8 lg:px-10">
+                <a href="http://10.10.2.169"
+                    class="mb-5 inline-flex w-fit items-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                    <span class="mr-2">&larr;</span>
+                    Back to Home
+                </a>
+
+                <img src="http://10.10.2.169/img/logopet.png" alt="Petly" class="h-11 w-fit">
+
+                <div class="mt-6">
+                    <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Welcome Back</h1>
+                    <p class="mt-2 text-sm leading-6 text-gray-600 sm:text-base">
+                        Log in to your account and continue shopping.
+                    </p>
+                </div>
+
+                <form method="POST" action="http://10.10.2.169/login" class="mt-6">
+                    <input type="hidden" name="_token" value="R7eLPazC2iHl3TuzU4Rz5X7MLMhwbAvPyilj0HFu" autocomplete="off">
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <button type="button"
+                            class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-500">
+                            Google
+                        </button>
+                        <button type="button"
+                            class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-500">
+                            Facebook
+                        </button>
+                    </div>
+
+                    <div class="my-5 flex items-center gap-3">
+                        <span class="h-px flex-1 bg-gray-200"></span>
+                        <span class="text-xs font-medium text-gray-500">or continue with email</span>
+                        <span class="h-px flex-1 bg-gray-200"></span>
+                    </div>
+
+                    <label class="block">
+                        <span class="mb-1 block text-sm font-semibold text-gray-700">Email</span>
+                        <input type="email" name="email" value="" required autocomplete="email"
+                            class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#FF9494] focus:ring-2 focus:ring-[#FF9494]/20">
+                    </label>
+
+                    <label class="mt-4 block">
+                        <span class="mb-1 block text-sm font-semibold text-gray-700">Password</span>
+                        <input type="password" name="password" required autocomplete="current-password"
+                            class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#FF9494] focus:ring-2 focus:ring-[#FF9494]/20">
+                    </label>
+
+                    <button type="submit"
+                        class="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-[#FF9494] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#fe7f7f]">
+                        Log In
+                    </button>
+                </form>
+
+                <p class="mt-5 text-center text-sm text-gray-600">
+                    Don't have an account?
+                    <a href="http://10.10.2.169/register" class="font-semibold text-[#FF9494] hover:text-[#fe7f7f]">
+                        Create an account
+                    </a>
+                </p>
+            </section>
+
+            <section class="hidden min-h-[34rem] bg-[#FFE3E1] lg:block">
+                <img src="http://10.10.2.169/img/registercat1.png" alt="Petly login"
+                    class="h-full w-full object-cover">
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>

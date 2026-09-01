@@ -1,110 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 
+<body class="min-h-screen bg-gray-100 dark:bg-slate-900">
+    <x-toast />
 
-<body class="h-full">
-    <div class="flex min-h-screen bg-gray-100">
-        <!-- Sidebar -->
-        <div class="w-16 bg-white flex flex-col items-center py-4 shadow-sm">
-            <div class="mb-8">
-                <img src="/img/logopet.png" alt="Petty Logo" class="w-10 h-7">
-            </div>
-            <div class="flex flex-col items-center gap-8">
-                {{-- <a href="/admin/dashboard" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-pie-chart-line text-gray-400 text-xl"></i>
-                </a> --}}
-                <a href="/admin/product" class="p-2 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors">
-                    <i class="ri-shopping-bag-3-line text-pink-400  text-xl"></i>
-                </a>
-                <a href="/admin/order" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-shopping-cart-line text-gray-400 text-xl"></i>
-                </a>
-                <a href="/admin/user" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-group-line text-gray-400 text-xl"></i>
-                </a>
-            </div>
-            <div class="mt-auto">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                        <i class="ri-logout-box-r-line text-red-500 text-xl"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
+    <div class="min-h-screen">
+        <x-admin-navbar />
 
-        <div class="mx-auto mt-10 bg-gray-100 min-h-screen">
-            <div class="flex items-center justify-between mb-5">
-                <div class="relative w-1/3">
-                    <input type="text" placeholder="Search"
-                        class="w-full border rounded-lg p-3 pl-10 shadow-sm focus:ring-2 focus:ring-gray-300">
-                    <svg class="absolute left-3 top-3 text-gray-400 w-5 h-5" xmlns="http://www.w3.org/2000/svg"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-4.35-4.35M10 17a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
-                    </svg>
-                </div>
-                <div class="flex items-center space-x-3">
-                    {{-- <button class="flex items-center px-4 py-2 bg-gray-200 rounded-lg shadow-sm">
-                        <svg class="w-5 h-5 mr-1 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16m-7 6h7" />
-                        </svg>
-                        Filter
-                    </button> --}}
+        <main class="w-full px-4 py-5 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-pink-500">Admin</p>
+                        <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Product Management</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ $products->total() }} products</p>
+                    </div>
+
                     <a href="{{ route('admin.product.add') }}"
-                        class="px-4 py-2 bg-red-400 text-white rounded-lg shadow-sm hover:bg-red-500">
-                        Add New Product
+                        class="inline-flex w-full items-center justify-center rounded-lg bg-[#FE9494] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#FE7A7A] sm:w-auto">
+                        <i class="ri-add-line mr-2 text-lg"></i>
+                        Add Product
                     </a>
                 </div>
+
+                <form method="GET" action="{{ route('admin.product.index') }}" class="mt-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                    <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_160px_auto_auto]">
+                        <div class="relative">
+                            <label for="product-search" class="sr-only">Search products</label>
+                            <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input id="product-search" name="q" type="search" value="{{ $filters['q'] ?? '' }}" placeholder="Search product, category, pet"
+                                class="w-full rounded-lg border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm shadow-sm outline-none transition focus:border-[#FE9494] focus:ring-2 focus:ring-[#FE9494]/20">
+                        </div>
+                        <select name="product_type" class="rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#FE9494]">
+                            <option value="">All categories</option>
+                            @foreach ($productTypes as $type)
+                                <option value="{{ $type->product_type_id }}" @selected(($filters['product_type'] ?? '') == $type->product_type_id)>{{ $type->product_type_name }}</option>
+                            @endforeach
+                        </select>
+                        <select name="pet_type" class="rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#FE9494]">
+                            <option value="">All pet types</option>
+                            @foreach ($petTypes as $type)
+                                <option value="{{ $type->pet_type_id }}" @selected(($filters['pet_type'] ?? '') == $type->pet_type_id)>{{ $type->pet_type_name }}</option>
+                            @endforeach
+                        </select>
+                        <select name="stock" class="rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#FE9494]">
+                            <option value="">All stock</option>
+                            <option value="available" @selected(($filters['stock'] ?? '') === 'available')>Available</option>
+                            <option value="out" @selected(($filters['stock'] ?? '') === 'out')>Out of stock</option>
+                        </select>
+                        <button type="submit" class="rounded-lg bg-[#FE9494] px-4 py-3 text-sm font-semibold text-white hover:bg-[#FE7A7A]">Filter</button>
+                        <a href="{{ route('admin.product.index') }}" class="rounded-lg border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50">Reset</a>
+                    </div>
+                </form>
+
+                <div class="mt-6 grid grid-cols-2 gap-3 md:hidden">
+                    @forelse ($products as $product)
+                        <article class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                            <div class="p-3">
+                                <img src="{{ $product->product_image }}" alt="{{ $product->product_name }}"
+                                    class="aspect-square w-full rounded-md object-cover">
+                                <div class="mt-3 min-w-0">
+                                    <p class="line-clamp-2 min-h-10 text-sm font-semibold text-gray-900">{{ $product->product_name }}</p>
+                                    <p class="mt-1 truncate text-xs uppercase text-gray-400">{{ $product->productType->product_type_name ?? '-' }}</p>
+                                    <p class="mt-2 text-sm font-semibold text-gray-900">IDR {{ number_format($product->product_price, 0, ',') }}</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 border-t border-gray-100 bg-gray-50 px-3 py-2.5">
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $product->product_stock > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600' }}">
+                                    {{ $product->product_stock > 0 ? 'Available' : 'Out of stock' }}
+                                </span>
+                                <p class="text-xs text-gray-500">{{ $product->product_stock }} pcs</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 border-t border-gray-100 p-3">
+                                <a href="{{ route('admin.product.edit', $product->product_id) }}"
+                                    class="inline-flex items-center justify-center rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    <i class="ri-edit-line mr-1.5 text-base"></i>
+                                    Edit
+                                </a>
+                                <form action="{{ route('admin.product.destroy', $product->product_id) }}" method="POST" class="min-w-0">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="inline-flex w-full items-center justify-center rounded-md bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600"
+                                        onclick="return confirm('Delete this product?')">
+                                        <i class="ri-delete-bin-line mr-1.5 text-base"></i>
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
+                            No products available.
+                        </div>
+                    @endforelse
+                </div>
+
+                <div class="mt-6 hidden overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm md:block">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+                            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold">Product</th>
+                                    <th class="px-6 py-3 font-semibold">Category</th>
+                                    <th class="px-6 py-3 font-semibold">Price</th>
+                                    <th class="px-6 py-3 font-semibold">Stock</th>
+                                    <th class="px-6 py-3 font-semibold">Status</th>
+                                    <th class="px-6 py-3 text-right font-semibold">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse ($products as $product)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <img src="{{ $product->product_image }}" alt="{{ $product->product_name }}"
+                                                    class="h-12 w-12 rounded-md object-cover">
+                                                <div class="min-w-0">
+                                                    <p class="max-w-xs truncate font-medium text-gray-900">{{ $product->product_name }}</p>
+                                                    <p class="text-xs text-gray-400">#{{ $product->product_id }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-gray-600">{{ $product->productType->product_type_name ?? '-' }}</td>
+                                        <td class="px-6 py-4 font-medium text-gray-900">IDR {{ number_format($product->product_price, 0, ',') }}</td>
+                                        <td class="px-6 py-4 text-gray-600">{{ $product->product_stock }} pcs</td>
+                                        <td class="px-6 py-4">
+                                            <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $product->product_stock > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600' }}">
+                                                {{ $product->product_stock > 0 ? 'Available' : 'Out of stock' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex justify-end gap-2">
+                                                <a href="{{ route('admin.product.edit', $product->product_id) }}"
+                                                    class="rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                                    Edit
+                                                </a>
+                                                <form action="{{ route('admin.product.destroy', $product->product_id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="rounded-md bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600"
+                                                        onclick="return confirm('Delete this product?')">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-10 text-center text-gray-500">No products available.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    {{ $products->links() }}
+                </div>
             </div>
-
-            <h2 class="text-2xl font-bold text-gray-800 mb-5">Product Management Dashboard</h2>
-
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="pr-10 pl-6 py-3 text-gray-600">Product Name</th>
-                            <th class="pr-10 pl-6 py-3 text-gray-600">Product ID</th>
-                            <th class="pr-10 pl-6 py-3 text-gray-600">Price</th>
-                            <th class="pr-10 pl-6 py-3 text-gray-600">Stock</th>
-                            <th class="pr-10 pl-8 py-3 text-gray-600">Status</th>
-                            <th class="pr-10 pl-10 py-3 text-gray-600">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($products['data'] as $product)
-                            <tr class="border-b last:border-b-0 hover:bg-gray-100">
-                                <td class="px-6 py-4">{{ $product['product_name'] }}</td>
-                                <td class="px-6 py-4">#{{ $product['product_id'] }}</td>
-                                <td class="px-6 py-4">IDR {{ $product['product_price'] }}</td>
-                                <td class="px-6 py-4">{{ $product['product_stock'] }} pcs</td>
-                                <td
-                                    class="px-6 py-4 font-semibold {{ $product['product_stock'] > 0 ? 'text-green-600' : 'text-red-500' }}">
-                                    {{ $product['product_stock'] > 0 ? 'Available' : 'Out of Stock' }}
-                                </td>
-                                <td class="px-8 py-4">
-                                    <form action="{{ route('products.destroy', $product['product_id']) }}"
-                                        method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-md"
-                                            onclick="return confirm('Are you sure you want to delete this product?')">
-                                            Delete
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+        </main>
     </div>
 </body>
+
+</html>

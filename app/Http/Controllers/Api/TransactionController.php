@@ -62,7 +62,7 @@ class TransactionController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
             'status_name' => 'required|in:complete,progress,pending,canceled',
-            'cart_id' => 'required|integer',
+            'cart_id' => 'required',
             'transaction_date' => 'required|date',
         ]);
 
@@ -74,53 +74,67 @@ class TransactionController extends Controller
             ], 422);
         }
 
-        // $checkCart = Transaction::where('foreign_cart_id', $request->cart_id)->first();
-        // if ($checkCart) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'Your cart already in transaction',
-        //     ]);
-        // }
+        // Accept a single cart_id or an array of cart_ids.
+        $cartIds = is_array($request->cart_id) ? $request->cart_id : [$request->cart_id];
 
         DB::beginTransaction();
         try {
 
             $transactionStatus = TransactionStatus::where('transaction_status_name', $request->status_name)->first();
+            $user = User::where('user_id', $request->user_id)->first();
+            $userCustomer = Customer::where('user_user_id', $request->user_id)->first();
 
-            $transaction = Transaction::create([
-                'transaction_date' => $request->transaction_date,
-                'user_user_id' => $request->user_id,
-                'foreign_cart_id' => $request->cart_id,
-                'delivery_delivery_id' => null,
-                'transactions_transaction_status_id' => $transactionStatus->transaction_status_id,
-            ]);
+            $transactions = [];
+            $products = [];
+            $carts = [];
 
-            $totalPayment = 0;
-            $cart = Cart::where('cart_id', $request->cart_id)->first();
-            $totalPayment += $cart->total_price;
+            foreach ($cartIds as $cartId) {
+                $cart = Cart::where('cart_id', $cartId)->first();
 
-            $transactionDetail = TransactionDetail::create([
-                'transaction_transaction_id' => $transaction->transaction_id,
-                'foreign_product_id' => $cart->foreign_product_id,
-                'quantity' => $cart->quantity,
-                'total_payment' => $totalPayment + 25000,
-            ]);
-            $user = User::where('user_id', $transaction->user_user_id)->first();
-            $product = Product::where('product_id', $cart->foreign_product_id)->first();
-            $userCustomer = Customer::where('user_user_id', $transaction->user_user_id)->first();
+                if (!$cart) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => false,
+                        'message' => "Cart not found: {$cartId}",
+                    ], 422);
+                }
+
+                $transaction = Transaction::create([
+                    'transaction_date' => $request->transaction_date,
+                    'user_user_id' => $request->user_id,
+                    'foreign_cart_id' => $cart->cart_id,
+                    'delivery_delivery_id' => null,
+                    'transactions_transaction_status_id' => $transactionStatus->transaction_status_id,
+                ]);
+
+                $totalPayment = $cart->total_price;
+
+                $transactionDetail = TransactionDetail::create([
+                    'transaction_transaction_id' => $transaction->transaction_id,
+                    'foreign_product_id' => $cart->foreign_product_id,
+                    'quantity' => $cart->quantity,
+                    'total_payment' => $totalPayment + 25000,
+                ]);
+
+                $product = Product::where('product_id', $cart->foreign_product_id)->first();
+
+                $transactions[] = $transaction;
+                $products[] = $product;
+                $carts[] = $cart;
+            }
+
             DB::commit();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Transaction successfully added',
                 'data' => [
-                    'transaction' => $transaction,
+                    'transactions' => $transactions,
                     'user' => $user,
                     'user_detail' => $userCustomer,
                     'transaction_status' => $transactionStatus,
-                    'transaction_detail' => $transactionDetail,
-                    'cart' => $cart,
-                    'product' => $product
+                    'carts' => $carts,
+                    'products' => $products,
                 ],
             ], 201);
         } catch (\Throwable $e) {

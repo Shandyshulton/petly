@@ -107,6 +107,7 @@ class UserController extends Controller implements HasMiddleware
             $user->update([
                 'username' => $request->username,
                 'email' => $request->email,
+                'phone_number' => $request->phone_number,
             ]);
 
             if ($roleName == 'customer') {

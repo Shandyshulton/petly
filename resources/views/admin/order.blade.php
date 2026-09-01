@@ -1,115 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 
-<body class="h-full">
-    <div class="flex min-h-screen bg-gray-100">
-        <!-- Sidebar -->
-        <div class="w-16 bg-white flex flex-col items-center py-4 shadow-sm">
-            <div class="mb-8">
-                <img src="/img/logopet.png" alt="Petty Logo" class="w-10 h-7">
-            </div>
-            <div class="flex flex-col items-center gap-8">
-                {{-- <a href="/admin/dashboard" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-pie-chart-line text-gray-400 text-xl"></i>
-                </a> --}}
-                <a href="/admin/product" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-shopping-bag-3-line text-gray-400 text-xl"></i>
-                </a>
-                <a href="/admin/order" class="p-2 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors">
-                    <i class="ri-shopping-cart-line text-pink-400 text-xl"></i>
-                </a>
-                <a href="/admin/user" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-group-line text-gray-400 text-xl"></i>
-                </a>
-            </div>
-            <div class="mt-auto">
-                {{-- <a href="/" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-settings-line text-gray-400 text-xl"></i>
-                </a> --}}
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                        <i class="ri-logout-box-r-line text-red-500 text-xl"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
+<body class="min-h-screen bg-gray-100 dark:bg-slate-900">
+    <x-toast />
 
+    <div class="min-h-screen">
+        <x-admin-navbar />
 
-        <div class="mx-auto mt-10 bg-gray-100">
-            <div class="flex items-center justify-between mb-5">
-                <div class="relative w-1/3">
-                    <input type="text" placeholder="Search"
-                        class="w-full border rounded-lg p-3 pl-10 shadow-sm focus:ring-2 focus:ring-gray-300">
-                    <svg class="absolute left-3 top-3 text-gray-400 w-5 h-5" xmlns="http://www.w3.org/2000/svg"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-4.35-4.35M10 17a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
-                    </svg>
+        <main class="w-full px-4 py-6 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-pink-500">Admin</p>
+                        <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Order Management</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ $transactions->total() }} orders</p>
+                    </div>
                 </div>
-                {{-- <div class="flex items-center space-x-3">
-                    <span class="text-gray-600">Showing</span>
-                    <select class="border rounded-lg p-2">
-                        <option>1</option>
-                        <option>2</option>
-                    </select>
-                    <button class="flex items-center px-4 py-2 bg-gray-200 rounded-lg shadow-sm">
-                        <svg class="w-5 h-5 mr-1 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16m-7 6h7" />
-                        </svg>
-                        Filter
-                    </button>
-                </div> --}}
-            </div>
 
-            <h2 class="text-2xl font-bold text-gray-800 mb-5">Order Management Dashboard</h2>
-
-            <!-- Product Table -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="pr-10 pl-6 py-3 text-gray-600">Customer Name</th>
-                            <th class="pr-10 pl-6 py-3 text-gray-600">Order ID</th>
-                            <th class="pr-10 pl-6 py-3 text-gray-600">Total Price</th>
-                            <th class="pr-10 pl-6 py-3 text-gray-600">Total Items</th>
-                            <th class="pr-10 pl-8 py-3 text-gray-600">Status</th>
-                            <th class="pr-10 pl-8 py-3 text-gray-600">TransactionDate</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (!empty($transactions))
-                            @foreach ($transactions as $transaction)
-                                <tr class="border-b last:border-b-0 hover:bg-gray-100">
-                                    <td class="px-6 py-4">{{ $transaction['user']['username'] }}</td>
-                                    <td class="px-6 py-4">
-                                        {{ $transaction['transaction_id'] }}</td>
-                                    <td class="px-6 py-4">IDR
-                                        {{ number_format($transaction['transaction_details']['total_payment'], 0, ',') }}
-                                    </td>
-                                    <td class="px-6 py-4">{{ $transaction['transaction_details']['quantity'] }} pcs</td>
-                                    <td class="uppercase px-6 py-4 font-semibold">
-                                        {{ $transaction['transaction_status']['transaction_status_name'] }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ $transaction['transaction_date'] }}
-                                    </td>
-                                </tr>
+                <form method="GET" action="{{ route('admin.order.index') }}" class="mt-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                    <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_160px_160px_auto_auto]">
+                        <div class="relative">
+                            <label for="order-search" class="sr-only">Search orders</label>
+                            <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input id="order-search" name="q" type="search" value="{{ $filters['q'] ?? '' }}" placeholder="Search order, customer, status"
+                                class="w-full rounded-lg border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm shadow-sm outline-none transition focus:border-[#FE9494] focus:ring-2 focus:ring-[#FE9494]/20">
+                        </div>
+                        <select name="status" class="rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#FE9494]">
+                            <option value="">All statuses</option>
+                            @foreach ($statuses as $status)
+                                <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ ucfirst($status) }}</option>
                             @endforeach
-                        @else
-                    </tbody>
-                    <tr>
-                        <td colspan="100%" class="text-center text-gray-500 py-4">No Data Available</td>
-                    </tr>
-                    @endif
-                </table>
+                        </select>
+                        <input name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}" class="rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#FE9494]">
+                        <input name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}" class="rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#FE9494]">
+                        <button type="submit" class="rounded-lg bg-[#FE9494] px-4 py-3 text-sm font-semibold text-white hover:bg-[#FE7A7A]">Filter</button>
+                        <a href="{{ route('admin.order.index') }}" class="rounded-lg border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50">Reset</a>
+                    </div>
+                </form>
 
+                <div class="mt-6 grid grid-cols-2 gap-3 md:hidden">
+                    @forelse ($transactions as $transaction)
+                        <article class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-gray-900">{{ $transaction->users->username ?? 'Unknown user' }}</p>
+                                <p class="mt-1 text-xs text-gray-400">Order #{{ $transaction->transaction_id }}</p>
+                            </div>
+                            <span class="mt-3 inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold uppercase text-gray-600">
+                                {{ $transaction->transactionStatus->transaction_status_name ?? '-' }}
+                            </span>
+
+                            <div class="mt-4 space-y-1.5 text-sm text-gray-600">
+                                <p><span class="text-gray-400">Total:</span> IDR {{ number_format($transaction->transactionDetails->total_payment ?? 0, 0, ',') }}</p>
+                                <p><span class="text-gray-400">Items:</span> {{ $transaction->transactionDetails->quantity ?? 0 }} pcs</p>
+                                <p><span class="text-gray-400">Date:</span> {{ $transaction->transaction_date }}</p>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
+                            No data available.
+                        </div>
+                    @endforelse
+                </div>
+
+                <div class="mt-6 hidden overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm md:block">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+                            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold">Customer Name</th>
+                                    <th class="px-6 py-3 font-semibold">Order ID</th>
+                                    <th class="px-6 py-3 font-semibold">Total Price</th>
+                                    <th class="px-6 py-3 font-semibold">Total Items</th>
+                                    <th class="px-6 py-3 font-semibold">Status</th>
+                                    <th class="px-6 py-3 font-semibold">Transaction Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse ($transactions as $transaction)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 font-medium text-gray-900">{{ $transaction->users->username ?? 'Unknown user' }}</td>
+                                        <td class="px-6 py-4 text-gray-600">#{{ $transaction->transaction_id }}</td>
+                                        <td class="px-6 py-4 font-medium text-gray-900">IDR {{ number_format($transaction->transactionDetails->total_payment ?? 0, 0, ',') }}</td>
+                                        <td class="px-6 py-4 text-gray-600">{{ $transaction->transactionDetails->quantity ?? 0 }} pcs</td>
+                                        <td class="px-6 py-4">
+                                            <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase text-gray-600">
+                                                {{ $transaction->transactionStatus->transaction_status_name ?? '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-gray-600">{{ $transaction->transaction_date }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-10 text-center text-gray-500">No data available.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    {{ $transactions->links() }}
+                </div>
             </div>
-        </div>
-
+        </main>
     </div>
 </body>
+
+</html>

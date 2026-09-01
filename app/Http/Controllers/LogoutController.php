@@ -10,7 +10,7 @@ class LogoutController extends Controller
     {
         if (session()->has('api_token')) {
             Http::withToken(session('api_token'))
-                ->post('http://petly.test:8080/api/logout');
+                ->post(config('services.petly_api.url') . '/api/logout');
         }
 
         // 🔥 Hapus seluruh session web

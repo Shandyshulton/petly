@@ -9,6 +9,8 @@
 .env
 .env.backup
 .env.production
+.env.local
+.env.*.local
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -21,3 +23,25 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# User-uploaded images (keep folders, ignore contents)
+/public/product-images/*
+!/public/product-images/.gitignore
+/public/profile-images/*
+!/public/profile-images/.gitignore
+
+# Local runtime files
+/storage/logs/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/views/.gitignore
+
+# Temp test scripts
+/test-temp.php
+/test-api-temp.php
+
+# Command Code local agent data (taste, settings, plans)
+/.commandcode

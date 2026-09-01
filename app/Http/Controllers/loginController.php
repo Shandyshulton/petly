@@ -40,7 +40,7 @@ class LoginController extends Controller
 
         try {
             // Request ke API
-            $response = Http::post('http://petly.test:8080/api/login', [
+            $response = Http::post(config('services.petly_api.url') . '/api/login', [
                 'email'    => $request->email,
                 'password' => $request->password,
             ]);
@@ -78,9 +78,19 @@ class LoginController extends Controller
                 'api_token' => $data['token'],
                 'user_id'   => $data['data']['user_id'],
                 'role_id'   => $data['data']['role_role_id'],
+                'username'  => $data['data']['username'] ?? null,
+                'email'     => $data['data']['email'] ?? null,
             ]);
 
-            // Redirect sesuai role
+            // Redirect sesuai role (kecuali user datang dari halaman services)
+            $intended = $request->query('redirect');
+
+            if ($intended === 'services' && $data['data']['role_role_id'] == 1) {
+                return redirect()
+                    ->route('services')
+                    ->with('success', 'Login successful');
+            }
+
             return $this->redirectByRole($data['data']['role_role_id'])
                 ->with('success', 'Login successful');
         } catch (\Throwable $e) {

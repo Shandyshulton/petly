@@ -5,38 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Courier Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 </head>
 
 <body>
-    <div class="flex min-h-screen bg-gray-100">
-        <!-- Sidebar -->
-        <div class="w-16 bg-white flex flex-col items-center py-4 shadow-sm">
-            <div class="mb-8">
-                <img src="/img/logopet.png" alt="Petty Logo" class="w-10 h-7">
-            </div>
-            <div class="flex flex-col items-center gap-8">
-                {{-- <a href="/" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-            <i class="ri-file-list-line text-gray-400 text-xl"></i>
-        </a> --}}
-                <a href="/courier/courier-info" class="p-2 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors">
-                    <i class="ri-user-line text-pink-400 text-xl"></i>
-                </a>
-                <a href="/courier/parcel-tracking" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="ri-truck-line text-gray-400 text-xl"></i>
-                </a>
-            </div>
-            <div class="mt-auto">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                        <i class="ri-logout-box-r-line text-red-500 text-xl"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-
+    <x-courier-navbar />
+    <div class="min-h-screen bg-gray-100">
         <!-- Main Content -->
         <div class="flex-1 p-4 mx-auto max-w-7xl mt-6 w-full">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -44,62 +28,198 @@
 
 
 
-                <div class="bg-white rounded-lg p-8 shadow-sm">
+                <div class="bg-white rounded-lg p-8 shadow-sm" x-data="{ editing: {{ $errors->any() ? 'true' : 'false' }} }">
                     <div class="flex flex-col items-center mb-3">
-                        <div class="w-14 h-14 rounded-full bg-pink-100 p-0.5 mb-1.5">
-                            <img src="/img/courier1.png" alt="Profile" class="w-full h-full rounded-full object-cover">
-                        </div>
-                        <h2 class="text-xl font-semibold text-gray-800">James Alexander Scott
-                        </h2>
-                        <p class="text-sm text-gray-500">Active Courier</p>
-                    </div>
-
-
-                    <div>
-                        <label class="block text-md font-medium text-gray-700 mb-1">Username</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                <i class="ri-lock-line text-gray-400 text-sm"></i>
-                            </div>
-                            <input type="text"
-                                class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md"
-                                placeholder="8467017971">
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="mt-4">
-                            <label class="block text-md font-medium text-gray-700 mb-1">Your Email</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                    <i class="ri-mail-line text-gray-400 text-sm"></i>
+                        <form id="courier-photo-form" method="POST" action="{{ route('courier.photo.update') }}" enctype="multipart/form-data">
+                            @csrf
+                            <div class="relative w-20 h-20 mb-1.5">
+                                <div class="w-full h-full rounded-full bg-pink-100 p-0.5">
+                                    <img id="courier-profile-image" src="{{ $courier->profile_image ? asset($courier->profile_image) : '/img/courier1.png' }}" alt="Profile" class="w-full h-full rounded-full object-cover">
                                 </div>
-                                <input type="email"
-                                    class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md"
-                                    placeholder="salikinsalimin@gmail.com">
+                                <label for="courier-header-photo-input"
+                                    class="absolute bottom-0 right-0 cursor-pointer flex h-7 w-7 items-center justify-center rounded-full bg-[#FE9494] text-white shadow-md hover:bg-[#FE7A7A] transition-colors"
+                                    title="Upload photo">
+                                    <i class="ri-camera-line text-sm"></i>
+                                </label>
                             </div>
+
+                            <x-profile-image-cropper
+                                name="profile_image"
+                                :image="$courier->profile_image"
+                                fallback="/img/courier1.png"
+                                size="w-20 h-20"
+                                compact
+                                onConfirm="submitCourierPhoto"
+                                inputId="courier-header-photo-input"
+                                previewId="courier-profile-image"
+                                hiddenId="courier-header-photo-hidden"
+                                modalId="courier-header-photo-modal"
+                                imageId="courier-header-photo-crop"
+                                confirmId="courier-header-photo-confirm"
+                                cancelId="courier-header-photo-cancel" />
+
+                            <script>
+                                window.submitCourierPhoto = function () {
+                                    document.getElementById('courier-photo-form').submit();
+                                };
+                            </script>
+                        </form>
+                        <h2 class="text-xl font-semibold text-gray-800">{{ $courier->username ?? 'Courier' }}</h2>
+                        <p class="text-sm text-gray-500">{{ ucfirst($courier->courierDetails->status ?? 'active') }} Courier</p>
+                    </div>
+
+                    {{-- Readonly view (default after save) --}}
+                    <div x-show="!editing" x-transition>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 py-2 border-b border-gray-100">
+                                <i class="ri-user-line text-gray-400"></i>
+                                <div class="min-w-0">
+                                    <p class="text-xs text-gray-400">Username</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $courier->username ?? '-' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 py-2 border-b border-gray-100">
+                                <i class="ri-mail-line text-gray-400"></i>
+                                <div class="min-w-0">
+                                    <p class="text-xs text-gray-400">Email</p>
+                                    <p class="text-sm font-medium text-gray-800 break-all">{{ $courier->email ?? '-' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 py-2 border-b border-gray-100">
+                                <i class="ri-phone-line text-gray-400"></i>
+                                <div class="min-w-0">
+                                    <p class="text-xs text-gray-400">Phone Number</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $courier->phone_number ?? '-' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 py-2 border-b border-gray-100">
+                                <i class="ri-truck-line text-gray-400"></i>
+                                <div class="min-w-0">
+                                    <p class="text-xs text-gray-400">Vehicle</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $courier->courierDetails->vehicle_name ?? '-' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 py-2 border-b border-gray-100">
+                                <i class="ri-roadster-line text-gray-400"></i>
+                                <div class="min-w-0">
+                                    <p class="text-xs text-gray-400">Plate Number</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $courier->courierDetails->plate_number ?? '-' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <button type="button" @click="editing = true"
+                                class="w-full bg-pink-400 text-white py-2 rounded-lg hover:bg-pink-500 transition-colors">
+                                Edit Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Edit form (hidden after save) --}}
+                    <form x-show="editing" x-transition method="POST" action="{{ route('courier.profile.update') }}" enctype="multipart/form-data">
+                        @csrf
+
+                        <div class="mb-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                            <x-profile-image-cropper
+                                name="profile_image"
+                                :image="$courier->profile_image"
+                                fallback="/img/courier1.png"
+                                size="w-16 h-16"
+                                inputId="courier_profile_image"
+                                previewId="courier-profile-input-preview"
+                                hiddenId="courier-profile-hidden"
+                                modalId="courier-profile-modal"
+                                imageId="courier-profile-crop"
+                                confirmId="courier-profile-confirm"
+                                cancelId="courier-profile-cancel" />
                         </div>
 
                         <div>
-                            <label class="block text-md font-medium text-gray-700 mb-1">Phone Number</label>
+                            <label class="block text-md font-medium text-gray-700 mb-1">Username</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                    <i class="ri-phone-line text-gray-400 text-sm"></i>
+                                    <i class="ri-user-line text-gray-400 text-sm"></i>
                                 </div>
-                                <input type="tel"
-                                    class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md"
-                                    placeholder="+621234567890">
+                                <input type="text" name="username" value="{{ old('username', $courier->username ?? '') }}"
+                                    class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md">
+                            </div>
+                            @error('username')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="mt-4">
+                                <label class="block text-md font-medium text-gray-700 mb-1">Your Email</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                        <i class="ri-mail-line text-gray-400 text-sm"></i>
+                                    </div>
+                                    <input type="email" name="email" value="{{ old('email', $courier->email ?? '') }}"
+                                        class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md">
+                                </div>
+                                @error('email')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-md font-medium text-gray-700 mb-1">Phone Number</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                        <i class="ri-phone-line text-gray-400 text-sm"></i>
+                                    </div>
+                                    <input type="tel" name="phone_number" value="{{ old('phone_number', $courier->phone_number ?? '') }}"
+                                        class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md">
+                                </div>
+                                @error('phone_number')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-md font-medium text-gray-700 mb-1">Vehicle</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                        <i class="ri-truck-line text-gray-400 text-sm"></i>
+                                    </div>
+                                    <input type="text" name="vehicle_name" value="{{ old('vehicle_name', $courier->courierDetails->vehicle_name ?? '') }}"
+                                        class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md">
+                                </div>
+                                @error('vehicle_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-md font-medium text-gray-700 mb-1">Plate Number</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                        <i class="ri-roadster-line text-gray-400 text-sm"></i>
+                                    </div>
+                                    <input type="text" name="plate_number" value="{{ old('plate_number', $courier->courierDetails->plate_number ?? '') }}"
+                                        class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md">
+                                </div>
+                                @error('plate_number')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                             </div>
                         </div>
 
+                        <div class="mt-4">
+                            <label class="block text-md font-medium text-gray-700 mb-1">New Password <span class="text-gray-400 text-xs">(optional)</span></label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                    <i class="ri-lock-line text-gray-400 text-sm"></i>
+                                </div>
+                                <input type="password" name="password" placeholder="Leave blank to keep current"
+                                    class="block w-full pl-7 pr-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-md">
+                            </div>
+                            @error('password')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
 
-                    </div>
-
-                    <div class="mt-3 text-center">
-                        <button class="text-gray-500 text-xs hover:text-pink-500 transition-colors">
-                            Show More
-                        </button>
-                    </div>
+                        <div class="mt-3 flex gap-2">
+                            <button type="button" @click="editing = false"
+                                class="flex-1 border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                class="flex-1 bg-pink-400 text-white py-2 rounded-lg hover:bg-pink-500 transition-colors">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
                 <!-- Weather and Stats Cards -->
                 <div class="space-y-4">
@@ -169,16 +289,16 @@
                         </div>
                     </div>
 
-                    <!-- Income Card -->
+                    <!-- Vehicle Card -->
                     <div class="bg-white rounded-lg p-4 shadow-sm relative">
 
-                        <h2 class="text-2xl font-normal text-gray-800">Mitsubishi Colt L300</h2>
+                        <h2 class="text-2xl font-normal text-gray-800">{{ $courier->courierDetails->vehicle_name ?? '-' }}</h2>
                         <p class="text-gray-500 text-sm mt-0.5">Vehicle Information</p>
                     </div>
 
-                    <!-- Bonus Card -->
+                    <!-- Plate Number Card -->
                     <div class="bg-white rounded-lg p-4 shadow-sm relative">
-                        <h2 class="text-2xl font-normal text-gray-800">B 1127 AL</h2>
+                        <h2 class="text-2xl font-normal text-gray-800">{{ $courier->courierDetails->plate_number ?? '-' }}</h2>
                         <p class="text-gray-500 text-sm mt-0.5">Plate Number</p>
                     </div>
                 </div>
@@ -228,7 +348,7 @@
                                             {{ ucwords($delivery['transaction']['transaction_details']['product']['product_type']['product_type_name']) }}
                                         </td>
                                         <td class="py-3 text-gray-500 px-2">
-                                            {{ \Carbon\Carbon::parse($delivery['delivery_deadline'])->format('d M Y, H:i') }}
+                                            {{ \Carbon\Carbon::parse($delivery['delivery_deadline'], 'UTC')->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }}
                                         </td>
                                         <td class="py-1 px-1 uppercase">
                                             <span class="px-1 py-1 bg-green-100 text-green-600 rounded text-[13px]">
@@ -251,6 +371,10 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Photo upload logic is handled by the reusable cropper component.
+    </script>
 </body>
 
 </html>

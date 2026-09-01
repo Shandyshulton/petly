@@ -9,6 +9,7 @@ use App\Http\Resources\PetResource;
 use App\Http\Controllers\Controller;
 use App\Models\PetType;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class PetController extends Controller
 {
@@ -33,8 +34,8 @@ class PetController extends Controller
         $validator = Validator::make($request->all(), [
             'pet_name' => 'required|string|max:255',
             'pet_gender' => 'required|in:male,female',
-            'pet_weight' => 'required|integer',
-            'pet_type' => 'required|in:dog,rabbit,cat,turtle',
+            'pet_weight' => 'required|integer|min:0',
+            'pet_type' => ['required', Rule::exists('pet_types', 'pet_type_name')],
         ]);
 
         if ($validator->fails()) {
@@ -46,9 +47,8 @@ class PetController extends Controller
         }
 
         DB::beginTransaction();
-        $petType = PetType::where('pet_type_name', $request->pet_type)->first();
         try {
-
+            $petType = PetType::where('pet_type_name', $request->pet_type)->firstOrFail();
 
             $pet = Pet::firstOrCreate([
                 'pet_name' => $request->pet_name,
@@ -75,7 +75,7 @@ class PetController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => false,
-                'message' => $petType->pet_type_id,
+                'message' => 'Failed to add pet',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -87,7 +87,7 @@ class PetController extends Controller
     public function show(Request $request, $id)
     {
         $user = $request->user();
-        $pet = Pet::where('customer_details_user_user_id', $user->customerDetails->user_user_id)
+        $pet = Pet::where('user_user_id', $user->user_id)
             ->where('pet_id', $id)
             ->firstOrFail();
 
@@ -99,7 +99,54 @@ class PetController extends Controller
      */
     public function update(Request $request, Pet $pet)
     {
-        //
+        if ($pet->user_user_id !== $request->user()->user_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Forbidden',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'pet_name' => 'required|string|max:255',
+            'pet_gender' => 'required|in:male,female',
+            'pet_weight' => 'required|integer|min:0',
+            'pet_type' => ['required', Rule::exists('pet_types', 'pet_type_name')],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $petType = PetType::where('pet_type_name', $request->pet_type)->firstOrFail();
+
+            $pet->update([
+                'pet_name' => $request->pet_name,
+                'pet_gender' => $request->pet_gender,
+                'pet_weight' => $request->pet_weight,
+                'pet_pet_types_id' => $petType->pet_type_id,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Pet successfully updated',
+                'data' => new PetResource($pet->load(['customerDetails', 'petTypeDetails'])),
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update pet',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

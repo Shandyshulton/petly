@@ -10,9 +10,15 @@ class CartsController extends Controller
 
     public function index(Request $request)
     {
+        if (!session()->has('api_token')) {
+            return redirect()
+                ->route('login')
+                ->with('failed', 'Please login first to view your cart.');
+        }
+
         $apiToken = session('api_token');
         $response = Http::withToken($apiToken)
-            ->get('http://petly.test:8080/api/customer/cart');
+            ->get(config('services.petly_api.url') . '/api/customer/cart');
 
         // Initialize values
         $items = [];
@@ -40,9 +46,15 @@ class CartsController extends Controller
 
     public function destroy($id)
     {
+        if (!session()->has('api_token')) {
+            return redirect()
+                ->route('login')
+                ->with('failed', 'Please login first to manage your cart.');
+        }
+
         $apiToken = session('api_token');
         Http::withToken($apiToken)
-            ->delete("http://petly.test:8080/api/customer/cart/{$id}");
+            ->delete(config('services.petly_api.url') . "/api/customer/cart/{$id}");
 
         return redirect()->route('cart.index');
     }

@@ -60,10 +60,10 @@
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
             @forelse ($filteredItems as $product)
                 <article class="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                    <a href="{{ route('product.show', $product['product_id']) }}" class="block">
+                    <a href="{{ route('product.show', $product['product_id']) }}" class="flex items-center justify-center bg-white p-2">
                         <img src="{{ $product['product_image'] ?? asset('img/logo-petly.png') }}"
                             alt="{{ $product['product_name'] }}"
-                            class="h-36 w-full object-cover sm:h-44 lg:h-48">
+                            class="h-36 w-full object-contain sm:h-44 lg:h-48">
                     </a>
 
                     <div class="p-3">

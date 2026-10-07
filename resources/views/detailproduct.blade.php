@@ -19,10 +19,10 @@
 
     <section class="py-6 sm:py-10">
         <div class="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-10">
-            <div class="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
+            <div class="flex items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
                 <img src="{{ $product['product_image'] ?? asset('img/logo-petly.png') }}"
                     alt="{{ $product['product_name'] }}"
-                    class="h-64 w-full object-cover sm:h-80 lg:h-[520px]">
+                    class="h-64 w-full object-contain sm:h-80 lg:h-[520px]">
             </div>
 
             <div class="flex min-w-0 items-center">

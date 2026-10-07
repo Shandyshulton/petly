@@ -29,10 +29,10 @@
         <div class="mx-auto mt-7 grid max-w-7xl grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             @foreach (collect($products['data'] ?? [])->take(4) as $product)
                 <article class="overflow-hidden rounded-lg bg-white text-left shadow-sm">
-                    <a href="{{ route('product.show', $product['product_id']) }}" class="block">
+                    <a href="{{ route('product.show', $product['product_id']) }}" class="flex items-center justify-center bg-white p-2">
                         <img src="{{ $product['product_image'] ?? asset('img/logo-petly.png') }}"
                             alt="{{ $product['product_name'] }}"
-                            class="h-32 w-full object-cover sm:h-44 lg:h-52">
+                            class="h-32 w-full object-contain sm:h-44 lg:h-52">
                     </a>
                     <div class="p-3 sm:p-4">
                         <p class="truncate text-xs uppercase text-gray-400">

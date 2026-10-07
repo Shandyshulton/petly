@@ -38,6 +38,7 @@ yarn-error.log
 !/storage/framework/cache/.gitignore
 !/storage/framework/sessions/.gitignore
 !/storage/framework/views/.gitignore
+/documentation 
 
 # Temp test scripts
 /test-temp.php

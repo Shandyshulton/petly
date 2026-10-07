@@ -110,6 +110,12 @@ class CheckoutController extends Controller
 
         $data = $response->json('data');
 
+        \Log::info('CHECKOUT API DATA', [
+            'data' => $data,
+        ]);
+
+        Session::put('checkout_data', $data);
+
         // simpan 1x saja
         Session::put('checkout_data', $data);
         Session::put('shipping_fee', 15000);

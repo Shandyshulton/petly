@@ -48,6 +48,14 @@ Route::get('/theme', fn () => view('theme'))->name('theme');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.process');
 
+// Portal login admin
+Route::get('/admin/login', [LoginController::class, 'showAdminLoginForm'])->name('admin.login');
+Route::post('/admin/login', [LoginController::class, 'adminLogin'])->name('admin.login.process');
+
+// Portal login courier
+Route::get('/courier/login', [LoginController::class, 'showCourierLoginForm'])->name('courier.login');
+Route::post('/courier/login', [LoginController::class, 'courierLogin'])->name('courier.login.process');
+
 Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.process');
 
@@ -117,85 +125,88 @@ Route::get('/history', [HistoryController::class, 'getHistory'])->name('history'
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN
+| ADMIN (dilindungi middleware 'admin' berbasis session role_id = 3)
 |--------------------------------------------------------------------------
 */
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN PRODUCT
-|--------------------------------------------------------------------------
-*/
+Route::middleware('admin')->group(function () {
 
-// LIST PRODUCT
-Route::get('/admin/product', [AdminProductController::class, 'index'])
-    ->name('admin.product.index');
+    /*
+    |----------------------------------------------------------------------
+    | ADMIN PRODUCT
+    |----------------------------------------------------------------------
+    */
 
-// ADD PRODUCT (FORM)
-Route::get('/admin/product/add', [AddProductController::class, 'showForm'])
-    ->name('admin.product.add');
+    // LIST PRODUCT
+    Route::get('/admin/product', [AdminProductController::class, 'index'])
+        ->name('admin.product.index');
 
-// STORE PRODUCT
-Route::post('/admin/product/add', [AddProductController::class, 'store'])
-    ->name('admin.product.store');
+    // ADD PRODUCT (FORM)
+    Route::get('/admin/product/add', [AddProductController::class, 'showForm'])
+        ->name('admin.product.add');
 
-Route::get('/admin/product/{product}/edit', [ProductsController::class, 'edit'])
-    ->name('admin.product.edit');
+    // STORE PRODUCT
+    Route::post('/admin/product/add', [AddProductController::class, 'store'])
+        ->name('admin.product.store');
 
-Route::put('/admin/product/{product}', [ProductsController::class, 'update'])
-    ->name('admin.product.update');
+    Route::get('/admin/product/{product}/edit', [ProductsController::class, 'edit'])
+        ->name('admin.product.edit');
 
-// DELETE PRODUCT (PALING BAWAH)
-Route::delete('/admin/product/{product}', [ProductsController::class, 'destroy'])
-    ->name('admin.product.destroy');
+    Route::put('/admin/product/{product}', [ProductsController::class, 'update'])
+        ->name('admin.product.update');
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN USER
-|--------------------------------------------------------------------------
-*/
+    // DELETE PRODUCT (PALING BAWAH)
+    Route::delete('/admin/product/{product}', [ProductsController::class, 'destroy'])
+        ->name('admin.product.destroy');
 
-Route::get('/admin/user', [UserManagementController::class, 'show'])
-    ->name('admin.user.index');
+    /*
+    |----------------------------------------------------------------------
+    | ADMIN USER
+    |----------------------------------------------------------------------
+    */
 
-Route::get('/admin/user/{id}/edit-courier', [UserManagementController::class, 'editCourier'])
-    ->name('admin.user.edit-courier');
+    Route::get('/admin/user', [UserManagementController::class, 'show'])
+        ->name('admin.user.index');
 
-Route::put('/admin/user/{id}/edit-courier', [UserManagementController::class, 'updateCourier'])
-    ->name('admin.user.update-courier');
+    Route::get('/admin/user/{id}/edit-courier', [UserManagementController::class, 'editCourier'])
+        ->name('admin.user.edit-courier');
 
-Route::delete('/admin/user/{id}', [UserManagementController::class, 'destroy'])
-    ->name('admin.user.destroy');
+    Route::put('/admin/user/{id}/edit-courier', [UserManagementController::class, 'updateCourier'])
+        ->name('admin.user.update-courier');
 
-Route::get('/admin/profile', [AdminProfileController::class, 'edit'])
-    ->name('admin.profile.edit');
+    Route::delete('/admin/user/{id}', [UserManagementController::class, 'destroy'])
+        ->name('admin.user.destroy');
 
-Route::put('/admin/profile', [AdminProfileController::class, 'update'])
-    ->name('admin.profile.update');
+    Route::get('/admin/profile', [AdminProfileController::class, 'edit'])
+        ->name('admin.profile.edit');
 
-Route::get('/admin/theme', [AdminProfileController::class, 'theme'])
-    ->name('admin.theme');
+    Route::put('/admin/profile', [AdminProfileController::class, 'update'])
+        ->name('admin.profile.update');
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN ORDER
-|--------------------------------------------------------------------------
-*/
+    Route::get('/admin/theme', [AdminProfileController::class, 'theme'])
+        ->name('admin.theme');
 
-Route::get('/admin/order', [OrderManagementController::class, 'getTransactions'])
-    ->name('admin.order.index');
+    /*
+    |----------------------------------------------------------------------
+    | ADMIN ORDER
+    |----------------------------------------------------------------------
+    */
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN APPOINTMENT
-|--------------------------------------------------------------------------
-*/
+    Route::get('/admin/order', [OrderManagementController::class, 'getTransactions'])
+        ->name('admin.order.index');
 
-Route::get('/admin/appointment', [AppointmentManagementController::class, 'index'])
-    ->name('admin.appointment.index');
+    /*
+    |----------------------------------------------------------------------
+    | ADMIN APPOINTMENT
+    |----------------------------------------------------------------------
+    */
 
-Route::patch('/admin/appointment/{appointment}', [AppointmentManagementController::class, 'updateStatus'])
-    ->name('admin.appointment.update');
+    Route::get('/admin/appointment', [AppointmentManagementController::class, 'index'])
+        ->name('admin.appointment.index');
+
+    Route::patch('/admin/appointment/{appointment}', [AppointmentManagementController::class, 'updateStatus'])
+        ->name('admin.appointment.update');
+});
 
 
 /*

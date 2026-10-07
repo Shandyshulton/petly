@@ -73,6 +73,8 @@
                     </svg>
                 </form>
 
+                <x-theme-toggle />
+
                 @if (session()->has('api_token'))
                     <a href="{{ route('cart.index') }}" class="rounded-full p-2 hover:bg-pink-50" aria-label="Open cart">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 stroke-gray-500 hover:stroke-[#FE9494]"
@@ -120,7 +122,9 @@
             </div>
 
             {{-- Mobile: cart + hamburger grouped on the right --}}
-            <div class="flex w-20 shrink-0 items-center justify-end gap-0.5 md:hidden">
+            <div class="flex w-32 shrink-0 items-center justify-end gap-0.5 md:hidden">
+                <x-theme-toggle />
+
                 @if (session()->has('api_token'))
                     <a href="{{ route('cart.index') }}" class="flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:text-[#FE9494]" aria-label="Open cart">
                         <i class="ri-shopping-cart-line text-xl"></i>

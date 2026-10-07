@@ -9,6 +9,10 @@
         } else {
             document.documentElement.classList.remove('dark');
         }
+
+        window.dispatchEvent(new CustomEvent('petly-theme-change', {
+            detail: { theme: theme },
+        }));
     }
 
     function current() {

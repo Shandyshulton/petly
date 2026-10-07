@@ -58,7 +58,9 @@
                 <img class="h-10 w-auto" src="{{ asset('img/logo-petly.png') }}" alt="Petly">
             </a>
 
-            <div class="flex w-20 shrink-0 items-center justify-end">
+            <div class="flex w-24 shrink-0 items-center justify-end gap-2">
+                <x-theme-toggle />
+
                 <button type="button" @click="profileOpen = false; menuOpen = !menuOpen"
                     class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:border-[#FE9494] hover:text-[#FE9494]"
                     aria-label="Open admin menu">

@@ -344,9 +344,9 @@
                                     <tr class="border-b border-gray-100">
                                         <td class="py-3 text-gray-800 px-2">{{ $delivery['delivery_id'] }}</td>
                                         <td class="py-3 text-gray-800 px-2">
-                                            {{ $delivery['transaction']['user']['username'] }}</td>
+                                            {{ $delivery['transaction']['user']['username'] ?? '-' }}</td>
                                         <td class="py-3 text-gray-800 px-2">
-                                            {{ ucwords($delivery['transaction']['transaction_details']['product']['product_type']['product_type_name']) }}
+                                            {{ ucwords($delivery['transaction']['transaction_details']['product']['product_type']['product_type_name'] ?? '-') }}
                                         </td>
                                         <td class="py-3 text-gray-500 px-2">
                                             {{ \Carbon\Carbon::parse($delivery['delivery_deadline'], 'UTC')->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }}
@@ -357,7 +357,7 @@
                                             </span>
                                         </td>
                                         <td class="py-3 text-gray-800 px-2 ">
-                                            {{ $delivery['delivery_class']['delivery_class_name'] }}</td>
+                                            {{ $delivery['delivery_class']['delivery_class_name'] ?? '-' }}</td>
                                         <td class="py-3 text-gray-800 px-2">
                                             {{ explode(',', $delivery['delivery_address'])[1] }}</td>
                                     </tr>

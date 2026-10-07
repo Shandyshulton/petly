@@ -80,15 +80,47 @@ class LoginController extends Controller
      |========================================================= */
 
     /**
-     * Tampilkan view portal; jika sudah login, langsung redirect sesuai role.
+     * Tampilkan view portal.
+     *
+     * Hanya lakukan redirect otomatis jika pengguna SUDAH login DAN role-nya
+     * cocok dengan portal yang dibuka. Jika role login saat ini berbeda dari
+     * portal (mis. sedang login admin lalu membuka /courier/login), form tetap
+     * ditampilkan agar pengguna bisa login ulang dengan akun yang sesuai.
      */
     private function renderPortal(string $portal)
     {
+        $config = self::PORTALS[$portal];
+
         if (session()->has('api_token') && session()->has('role_id')) {
-            return $this->redirectByRole((int) session('role_id'));
+            $currentRole = (int) session('role_id');
+
+            // Role sesuai portal → langsung arahkan ke dashboard-nya.
+            if ($currentRole === $config['role_id']) {
+                return $this->redirectByRole($currentRole);
+            }
+
+            // Role berbeda → tampilkan form, beri tahu sedang login sebagai role lain.
+            return view($config['view'])->with(
+                'activeRoleNotice',
+                'Anda sedang login sebagai ' . $this->roleLabel($currentRole)
+                    . '. Login di bawah akan menggantikan sesi tersebut.'
+            );
         }
 
-        return view(self::PORTALS[$portal]['view']);
+        return view($config['view']);
+    }
+
+    /**
+     * Label role untuk ditampilkan ke pengguna.
+     */
+    private function roleLabel(int $roleId): string
+    {
+        return match ($roleId) {
+            self::ROLE_CUSTOMER => 'Customer',
+            self::ROLE_COURIER  => 'Courier',
+            self::ROLE_ADMIN    => 'Admin',
+            default             => 'pengguna',
+        };
     }
 
     /**

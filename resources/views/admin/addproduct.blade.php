@@ -25,7 +25,7 @@
     <div class="min-h-screen">
         <x-admin-navbar />
 
-        <main class="w-full px-4 py-6 sm:px-6 lg:px-8">
+        <main class="w-full px-4 py-6 sm:px-6 lg:px-8 lg:pl-72">
             <div class="mx-auto max-w-3xl">
                 <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>

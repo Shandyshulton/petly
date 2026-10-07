@@ -23,7 +23,7 @@
 
 <body class="bg-gray-100">
     <x-courier-navbar />
-    <div class="min-h-screen">
+    <div class="min-h-screen lg:pl-72">
         <!-- Main Content -->
         <div class="flex-1 p-4 lg:pb-4">
             <!-- Search Bar -->

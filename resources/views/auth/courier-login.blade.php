@@ -43,6 +43,12 @@
                     </p>
                 </div>
 
+                @isset($activeRoleNotice)
+                    <div class="mt-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        {{ $activeRoleNotice }}
+                    </div>
+                @endisset
+
                 <form method="POST" action="{{ route('courier.login.process') }}" class="mt-6">
                     @csrf
 

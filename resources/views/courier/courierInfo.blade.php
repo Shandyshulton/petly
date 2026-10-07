@@ -21,7 +21,7 @@
 
 <body>
     <x-courier-navbar />
-    <div class="min-h-screen bg-gray-100">
+    <div class="min-h-screen bg-gray-100 lg:pl-72">
         <!-- Main Content -->
         <div class="flex-1 p-4 mx-auto max-w-7xl mt-6 w-full">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">

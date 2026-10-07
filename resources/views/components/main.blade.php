@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
     @vite('resources/js/app.js')
     <title>Main Page</title>
+    <x-favicon />
 </head>
 <body class="h-full">
     <div class="min-h-full"><x-navbar></x-navbar>

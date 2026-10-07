@@ -149,6 +149,12 @@ class CheckoutController extends Controller
 
         $total = $subtotal + $shippingFee + $taxAmount;
 
+        \Log::info('CHECKOUT VIEW DATA', [
+            'products' => $products,
+            'carts' => $carts,
+            'transactions' => $transactions,
+        ]);
+
         // Alamat dari DB lokal (multi-address): aktif default, fallback ke alamat API.
         $addresses = Address::where('user_user_id', session('user_id'))
             ->orderByDesc('is_active')
